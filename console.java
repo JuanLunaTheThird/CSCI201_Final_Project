@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 class console {
 	
-	
+	private String user = "";
 	public static main void(String[] args)
 	{
 		Scanner scan = new Scanner(System.in);
@@ -39,6 +39,7 @@ class console {
 
 	private Connection getConnection()
 	{
+		Scanner scan = new Scanner(System.in);
 		Connection conn = null;
 		String host = "jdbc:sqlserver://localhost:3306/cscifinalproject";
 		String username = "root";
@@ -91,9 +92,31 @@ class console {
   
 	private void loginUser()
 	{
-		System.out.println("Enter Username:");
-		String username = scan.nextLine();
-		System.out.println("Enter password:");
-		String password = scan.nextLine();
+		Scanner scan = new Scanner(System.in);
+		bool validUser = false;
+		while(!validUser)
+		{
+			System.out.println("Enter Username:");
+			String username = scan.nextLine();
+			System.out.println("Enter password:");
+			String password = scan.nextLine();
+			String sqlQuery = "SELECT * FROM users WHERE username = \"" + username + "\" AND "
+					+ "password = \"" + password + "\";";
+			try(Statement stm = conn.createStatement())
+			{
+				Results res = stm.execute(sqlQuery);
+				if(!res.next())
+				{
+					System.out.println("Invalid username or password");
+				}
+				else
+				{
+					System.out.println("Welcome user " + username);
+					this.user = username;
+					validUser = true;
+				}
+			}
+		}
+		
 	}
 }
