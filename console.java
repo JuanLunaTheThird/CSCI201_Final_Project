@@ -1,47 +1,59 @@
+import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Scanner;
 
+
+
 class console {
-	
-	private String user = "";
-	public static main void(String[] args)
+	public static void main(String[] args)
 	{
+		String user = "";
 		Scanner scan = new Scanner(System.in);
 		System.out.println("Enter \"log in\" or \"register\"");
 		String input = scan.nextLine();
 		input = input.trim();
 		input = input.toLowerCase();
-		
+		Connection conn = null;
 		try
 		{
-			Connection conn = getConnection();
+			conn = getConnection();
 		}
 		catch(Exception e)
 		{
-			return 0;
+			return;
 		}
 		if(input == "log in")
 		{
-		  loginUser();
+			user = loginUser(conn);
+
 		}
 		else if(input == "register")
 		{
-			registerUser();
-			loginUser();
+			registerUser(conn);
+			user = loginUser(conn);
 		}
 		else
 		{
 		  System.out.println("invalid option");
-		      return 0;
+		      return;
 		}
 	}
 
-	private Connection getConnection()
+	private static Connection getConnection()
 	{
 		Scanner scan = new Scanner(System.in);
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+		}
+		catch(Exception e)
+		{
+			System.out.println("please");
+		}
 		Connection conn = null;
-		String host = "jdbc:sqlserver://localhost:3306/cscifinalproject";
+		String host = "jdbc:mysql://localhost:3306";
 		String username = "root";
 		String password = "root";
 		try {
@@ -52,23 +64,26 @@ class console {
 			System.out.println("error establishing connection to sql database");
 		    System.out.println(e.getMessage());
 		}
-		    
+
 		return conn;
 	}
-  
-	private void registerUser(Connection conn)
+
+	private static void registerUser(Connection conn)
 	{
-		bool validUser = false;
+		Scanner scan = new Scanner(System.in);
+		boolean validUser = false;
+		String username = "";
+		String password = "";
 		while(!validUser)
 		{
 			System.out.println("Enter new Username: ");
-			String username = scan.nextLine();
+			username = scan.nextLine();
 			System.out.println("Enter new password: ");
-			String password = scan.nextLine();
+			password = scan.nextLine();
 			String checkQuery = "SELECT * FROM users WHERE username = \"" + username + "\";";
 			try(Statement stm = conn.createStatement())
 			{
-				Results res = stm.execute(checkQuery);
+				ResultSet res = stm.executeQuery(checkQuery);
 				if(!res.next())
 			    {
 					validUser = true;
@@ -82,29 +97,31 @@ class console {
 		String insertUser = "INSERT INTO users VALUES(" + username + ", " + password + ");";
 		try(Statement stm = conn.createStatement())
 		{
-			Results res = stm.execute(insertUser);
+			ResultSet res = stm.executeQuery(insertUser);
 		}
 		catch(SQLException e)
 		{
 			System.out.println(e.getMessage());
 		}
 	}
-  
-	private void loginUser()
+
+	private static String loginUser(Connection conn)
 	{
 		Scanner scan = new Scanner(System.in);
-		bool validUser = false;
+		boolean validUser = false;
+		String username = "";
+		String password = "";
 		while(!validUser)
 		{
 			System.out.println("Enter Username:");
-			String username = scan.nextLine();
+			username = scan.nextLine();
 			System.out.println("Enter password:");
-			String password = scan.nextLine();
+			password = scan.nextLine();
 			String sqlQuery = "SELECT * FROM users WHERE username = \"" + username + "\" AND "
 					+ "password = \"" + password + "\";";
 			try(Statement stm = conn.createStatement())
 			{
-				Results res = stm.execute(sqlQuery);
+				ResultSet res = stm.executeQuery(sqlQuery);
 				if(!res.next())
 				{
 					System.out.println("Invalid username or password");
@@ -112,11 +129,15 @@ class console {
 				else
 				{
 					System.out.println("Welcome user " + username);
-					this.user = username;
 					validUser = true;
 				}
 			}
+			catch(SQLException e)
+			{
+				System.out.println(e.getMessage());
+			}
 		}
-		
+		return username;
+
 	}
 }
