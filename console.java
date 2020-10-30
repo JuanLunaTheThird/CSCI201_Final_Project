@@ -25,12 +25,12 @@ class console {
 		{
 			return;
 		}
-		if(input == "log in")
+		if(input.equals("log in"))
 		{
 			user = loginUser(conn);
 
 		}
-		else if(input == "register")
+		else if(input.equals( "register"))
 		{
 			registerUser(conn);
 			user = loginUser(conn);
@@ -45,15 +45,8 @@ class console {
 	private static Connection getConnection()
 	{
 		Scanner scan = new Scanner(System.in);
-		try {
-			Class.forName("com.mysql.jdbc.Driver");
-		}
-		catch(Exception e)
-		{
-			System.out.println("please");
-		}
 		Connection conn = null;
-		String host = "jdbc:mysql://localhost:3306";
+		String host = "jdbc:mysql://localhost:3306/cscifinalproject";
 		String username = "root";
 		String password = "root";
 		try {
@@ -94,15 +87,16 @@ class console {
 				System.out.println(e.getMessage());
 			}
 		}
-		String insertUser = "INSERT INTO users VALUES(" + username + ", " + password + ");";
+		String insertUser = "INSERT INTO users (username, password)" + " VALUES (\"" + username + "\", \"" + password + "\");";
 		try(Statement stm = conn.createStatement())
 		{
-			ResultSet res = stm.executeQuery(insertUser);
+			stm.executeUpdate(insertUser);
 		}
 		catch(SQLException e)
 		{
 			System.out.println(e.getMessage());
 		}
+		System.out.println("done registering");
 	}
 
 	private static String loginUser(Connection conn)
@@ -117,8 +111,7 @@ class console {
 			username = scan.nextLine();
 			System.out.println("Enter password:");
 			password = scan.nextLine();
-			String sqlQuery = "SELECT * FROM users WHERE username = \"" + username + "\" AND "
-					+ "password = \"" + password + "\";";
+			String sqlQuery = "SELECT * FROM users WHERE username = \"" + username + "\";";
 			try(Statement stm = conn.createStatement())
 			{
 				ResultSet res = stm.executeQuery(sqlQuery);
