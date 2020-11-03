@@ -13,17 +13,17 @@ public class ServerLoginAuthentication {
 	
 	public static Packet receiveClientLogin(ObjectInputStream ServerObjectInStream) {
 		
-		LoginAttempt login = null;
+		Packet login = null;
 		
 		try {
-			login = (LoginAttempt) ServerObjectInStream.readObject();
+			login = (Packet) ServerObjectInStream.readObject();
 		}catch(IOException e){
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
 			
 		}
 		
-		return new Packet(login);
+		return login;
 	}
 	
 	public static void sendLoginAttemptToClient(ObjectOutputStream ServerObjectOutStream, LoginAttempt authenticatedUser) {
