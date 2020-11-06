@@ -26,7 +26,7 @@ public class ServerLoginAuthentication {
 		return login;
 	}
 	
-	public static void sendLoginAttemptToClient(ObjectOutputStream ServerObjectOutStream, LoginAttempt authenticatedUser) {
+	public static void sendUserToClient(ObjectOutputStream ServerObjectOutStream, User authenticatedUser) {
 		
 		try {
 			ServerObjectOutStream.writeObject(authenticatedUser);
@@ -37,11 +37,11 @@ public class ServerLoginAuthentication {
 	
 	
 	
-	public static LoginAttempt receiveLoginAttemptFromServer(ObjectInputStream ClientObjectInStream) {
+	public static User receiveUserFromServer(ObjectInputStream ClientObjectInStream) {
 		
-		LoginAttempt authenticatedUser = null;
+		User authenticatedUser = null;
 		try {
-			authenticatedUser = (LoginAttempt) ClientObjectInStream.readObject();
+			authenticatedUser = (User) ClientObjectInStream.readObject();
 		}catch(IOException e){
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
@@ -51,7 +51,7 @@ public class ServerLoginAuthentication {
 		return authenticatedUser;
 	}
 	
-	public static void sendLoginAttemptToServer(LoginAttempt attempt, ObjectOutputStream ClientObjectOutStream) {
+	public static void sendUserToServer(User attempt, ObjectOutputStream ClientObjectOutStream) {
 		
 		Packet packet = new Packet(attempt);
 	

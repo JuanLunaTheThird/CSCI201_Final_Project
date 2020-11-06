@@ -1,6 +1,7 @@
 package serverTests;
 
 
+
 import java.net.*;
 
 
@@ -10,7 +11,7 @@ import networking.ServerLoginAuthentication;
 
 import java.io.*;
 
-public class TestingLoginServer {
+public class Server {
 
 	public static void main(String[] args) {
 		
@@ -68,3 +69,4 @@ public class TestingLoginServer {
 	}
 
 }
+

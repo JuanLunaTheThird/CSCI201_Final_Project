@@ -7,7 +7,7 @@ public class Packet implements Serializable {
 	 * 
 	 */
 	
-	private LoginAttempt login;
+	private User login;
 	private Message message;
 	private String packetType;
 	private static String PACKET_TYPE_LOGIN = "login";
@@ -15,9 +15,9 @@ public class Packet implements Serializable {
 	private static String PACKET_TYPE_ERROR = "error";
 	
 	
-	public Packet(LoginAttempt loginAttempt) {
+	public Packet(User User) {
 		message = null;
-		login = loginAttempt;
+		login = User;
 		packetType = PACKET_TYPE_LOGIN;
 	}
 	
@@ -30,7 +30,7 @@ public class Packet implements Serializable {
 	public String getUsername(){
 	
 		if(packetType.equals(PACKET_TYPE_MESSAGE)) {
-			System.err.println("You're getting the username on a packet with no LoginAttempt");
+			System.err.println("You're getting the username on a packet with no User");
 			return null;
 		}
 		return login.getUsername();
@@ -38,7 +38,7 @@ public class Packet implements Serializable {
 	
 	public String getPassword() {
 		if(packetType.equals(PACKET_TYPE_MESSAGE)) {
-			System.err.println("You're getting the password on a packet with no LoginAttempt");
+			System.err.println("You're getting the password on a packet with no User");
 			return null;
 		}
 		

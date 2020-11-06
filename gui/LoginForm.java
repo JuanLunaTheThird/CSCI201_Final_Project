@@ -12,7 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import serialized.LoginAttempt;
+import serialized.User;
 import networking.ClientLoginFunctionality;
 public class LoginForm extends JPanel implements ActionListener {
 
@@ -82,7 +82,7 @@ public class LoginForm extends JPanel implements ActionListener {
 		}
 		
 		if(user != "" && pw != "") {
-			LoginAttempt userTry = new LoginAttempt(user, pw, false);
+			User userTry = new User(user, pw, false);
 			boolean authenticated = ClientLoginFunctionality.tryToLogin(userTry);
 			if(authenticated) {
 				JOptionPane.showMessageDialog(this, "Verified!");

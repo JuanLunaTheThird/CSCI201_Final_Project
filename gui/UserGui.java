@@ -42,7 +42,7 @@ public class UserGui extends JPanel
 	        removeButton.setActionCommand(REMOVE_COMMAND);
 	        removeButton.addActionListener(this);
 	        
-	        JButton importButton = new JButton("Remove File");
+	        JButton importButton = new JButton("Import Project");
 	        importButton.setActionCommand(IMPORT_COMMAND);
 	        importButton.addActionListener(this);
 	          

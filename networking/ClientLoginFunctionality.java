@@ -2,16 +2,16 @@ package networking;
 
 import java.net.*;
 
-import serialized.LoginAttempt;
+import serialized.User;
 import java.io.*;
 
 public class ClientLoginFunctionality {
 	
-	public static boolean tryToLogin(LoginAttempt login) {
+	public static boolean tryToLogin(User login) {
 	
 		InputStream is = null;
 		ObjectInputStream clientInput = null;
-		LoginAttempt authStatus = null;
+		User authStatus = null;
 		Socket client;
 		boolean success = false;
 	
@@ -25,9 +25,9 @@ public class ClientLoginFunctionality {
 			is = client.getInputStream();
 			clientInput = new ObjectInputStream(is);
 			
-			ServerLoginAuthentication.sendLoginAttemptToServer(login, clientOutput);
+			ServerLoginAuthentication.sendUserToServer(login, clientOutput);
 			System.err.println("Server sending auth status back");
-			authStatus = ServerLoginAuthentication.receiveLoginAttemptFromServer(clientInput);
+			authStatus = ServerLoginAuthentication.receiveUserFromServer(clientInput);
 			
 			if(authStatus!= null) {
 				if(authStatus.wasSuccessful()) {
@@ -44,11 +44,11 @@ public class ClientLoginFunctionality {
 	}
 	
 	
-	public static boolean registerUser(LoginAttempt register) {
+	public static boolean registerUser(User register) {
 		
 		InputStream is = null;
 		ObjectInputStream clientInput = null;
-		LoginAttempt authStatus = null;
+		User authStatus = null;
 		Socket client;
 		boolean success = false;
 	
@@ -62,9 +62,9 @@ public class ClientLoginFunctionality {
 			is = client.getInputStream();
 			clientInput = new ObjectInputStream(is);
 			
-			ServerLoginAuthentication.sendLoginAttemptToServer(register, clientOutput);
+			ServerLoginAuthentication.sendUserToServer(register, clientOutput);
 			System.err.println("Server sending auth status back");
-			authStatus = ServerLoginAuthentication.receiveLoginAttemptFromServer(clientInput);
+			authStatus = ServerLoginAuthentication.receiveUserFromServer(clientInput);
 			
 			if(authStatus!= null) {
 				if(authStatus.wasSuccessful()) {
