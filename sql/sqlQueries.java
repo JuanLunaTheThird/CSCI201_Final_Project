@@ -1,3 +1,5 @@
+package test2;
+
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -31,6 +33,7 @@ class sqlQueries {
   	 * returns true if project is successfully created and registered to user
   	 * inserts into project table and userstoproject
   	 * does not check if username is valid
+  	 * username of founder and name of project
   	 */
 	public static boolean createNewProject(String username, String project)
 	{
@@ -77,6 +80,7 @@ class sqlQueries {
 	/*
 	 * return empty string if there is no project assigned to username
 	 * returns string of path otherwise
+	 * project name and username of the founder
 	 */
 	public static String getProjectPath(String project, String username)
 	{
@@ -106,6 +110,7 @@ class sqlQueries {
 	/*
 	 * returns false if the user is already added to the project
 	 * returns true if successful
+	 *
 	 */
 	public static boolean addUserToProject(String username, String project, String owner)
 	{
