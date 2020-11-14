@@ -1,11 +1,11 @@
-package test2;
-
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 class sqlQueries {
 
@@ -24,14 +24,6 @@ class sqlQueries {
 			System.out.println(e.getMessage());
 		}
 		return conn;
-	}
-
-	public static void main(String args[])
-	{
-//		boolean newe = createNewProject("j", "test");
-		//String didit = getProjectPath("j", "test");
-		addUserToProject("Juan", "test", "j");
-		System.out.println("fe");
 	}
 
   	/*
@@ -119,7 +111,7 @@ class sqlQueries {
 	{
 		Connection conn = getConnection();
 		String path = "C:\\\\Users\\\\juan\\\\Desktop\\\\Juan\\\\Prohub\\\\" + owner + "\\\\" + project;
-		String checkQuery = "SELECT * FROM userstoprojects WHERE username = \"" + username + "\" AND project_directory = \"" + project + "\";";
+		String checkQuery = "SELECT * FROM userstoprojects WHERE username = \"" + username + "\" AND project_directory = \"" + path + "\";";
 		try(Statement stm = conn.createStatement())
 		{
 			ResultSet res = stm.executeQuery(checkQuery);
@@ -148,29 +140,28 @@ class sqlQueries {
 	public static String[] userProjects(String username)
 	{
 		Connection conn = getConnection();
+		ArrayList<String> arrlist = new ArrayList<String>();
 		String[] projects = null;
-		String checkQuery = "SELECT * FROM userstoprojects WHERE username = \"" + username + "\";";
+		String checkQuery = "SELECT projects.project FROM userstoprojects JOIN projects ON projects.stored_directory = project_directory WHERE userstoprojects.username = \"" + username + "\";";
 		try(Statement stm = conn.createStatement())
 		{
 			ResultSet res = stm.executeQuery(checkQuery);
-			int size =0;
-			if (res != null)
+			while(res.next())
 			{
-				res.last();    // moves cursor to the last row
-				size = res.getRow(); // get row id
-				projects = new String[size];
-				res.first();
-				size = 0;
-				do {
-					projects[size] = res.getString(1);
-				}while(res.next());
+				arrlist.add(res.getString(1));
 			}
+
 		}
 		catch(SQLException e)
 		{
-			System.out.println(e.getMessage());
+			e.printStackTrace();
 		}
 
+		projects = new String[arrlist.size()];
+		for(int i = 0; i < arrlist.size(); i++)
+		{
+			projects[i] = arrlist.get(i);
+		}
 		return projects;
 	}
 
