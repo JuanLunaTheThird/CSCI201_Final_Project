@@ -267,7 +267,7 @@ class sqlQueries {
 	*/
 	public static String directoryToProjectName(String directory)
 	{
-		String [] arr = directory.split("\", 10);
+		String [] arr = directory.split("\\", 10);
 		return arr[arr.length];
 	}
 
