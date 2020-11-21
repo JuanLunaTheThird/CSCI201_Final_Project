@@ -37,7 +37,7 @@ public class LocalFileIO {
 		System.err.println(path);
 		try {
 			byte[] bytes = Files.readAllBytes(path);
-
+			
 			return bytes;
 		} catch (IOException e) {
 			

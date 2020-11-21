@@ -1,3 +1,4 @@
+package gui;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.Window;
@@ -16,6 +17,7 @@ public class MainGUI extends JPanel implements ActionListener {
 	private JPanel panel;
 	private static String LOGIN = "Login";
     private static String REGISTER = "Register";
+    private static String GUEST = "Guest Login";
 	
 	public MainGUI() {
 		super(new BorderLayout());
@@ -30,9 +32,16 @@ public class MainGUI extends JPanel implements ActionListener {
 		register.setActionCommand(REGISTER);
 		register.addActionListener(this);
 		
+		JButton guest = new JButton(GUEST);
+		guest.setActionCommand(GUEST);
+		guest.addActionListener(this);
+		
+		
 		panel = new JPanel(new GridLayout(1,0));
 		panel.add(login);
 		panel.add(register);
+		panel.add(guest);
+		
 		
 		add(panel, BorderLayout.CENTER);
 	}
@@ -64,7 +73,9 @@ public class MainGUI extends JPanel implements ActionListener {
         	((Window) this.getRootPane().getParent()).dispose();
             LoginForm registerForm = new LoginForm("");
             registerForm.addCredentials();
-        } 
+        }else if(GUEST.equals(GUEST)) {
+        	((Window) this.getRootPane().getParent()).dispose();
+        }
     }
 	public static void main(String[] args) {
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {

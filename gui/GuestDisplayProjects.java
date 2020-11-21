@@ -16,17 +16,16 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-public class DisplayUserProjects extends JPanel implements ActionListener {
+public class GuestDisplayProjects extends JPanel implements ActionListener {
 	private JPanel panel;
 	private String username;
-	private JButton newProject;
-	private final String NEW_PROJ = "NEW_PROJ";
+	
 	private final String SELECT_PROJ = "SELECT_PROJ";
 	private JLabel projectField;
 	private JTextField projName;
 	
 	
-	public DisplayUserProjects(String username) {
+	public GuestDisplayProjects(String username) {
 		
 		
 		super(new BorderLayout());	
@@ -34,9 +33,6 @@ public class DisplayUserProjects extends JPanel implements ActionListener {
 		String [] projects = {"On mamas", "Diego"};
 				//loadUserProjects();
 		JComboBox<String> projectList = new JComboBox<String>(projects);
-		newProject = new JButton("Register new Project");
-		newProject.setActionCommand(NEW_PROJ);
-		newProject.addActionListener(this);
 		
 		projectList.setActionCommand(SELECT_PROJ);
 		projectList.addActionListener(this);
@@ -45,14 +41,13 @@ public class DisplayUserProjects extends JPanel implements ActionListener {
 
 		
 		projectField = new JLabel();
-		projectField.setText("Select a working project");
+		projectField.setText("Select a project");
 		projName = new JTextField();
 		
 		
 		panel.add(projectField);
 		panel.add(projName);
 		panel.add(projectList);
-		panel.add(newProject);
 		add(panel, BorderLayout.CENTER);
 	}
 
@@ -69,7 +64,7 @@ public class DisplayUserProjects extends JPanel implements ActionListener {
 	public void createAndShowGUI(){
 		JFrame frame = new JFrame("Select a current project or register a new one");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		DisplayUserProjects displayProjects = new DisplayUserProjects(username);
+		GuestDisplayProjects displayProjects = new GuestDisplayProjects(username);
 		displayProjects.setOpaque(true);
 		frame.setContentPane(displayProjects);
 		frame.pack();
@@ -88,15 +83,7 @@ public class DisplayUserProjects extends JPanel implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String cmd = e.getActionCommand();
-		
-		if(cmd.equals(NEW_PROJ)) {
-			String project = projName.getText();
-			//send new project to sql server
-			User client = new User(username, project, "register_project"); 
-			((Window) this.getRootPane().getParent()).dispose();
-			FileDisplayPanel gui = new FileDisplayPanel(client, false);
-			gui.startProject();
-		}else if(cmd.equals(SELECT_PROJ)) {
+		if(cmd.equals(SELECT_PROJ)) {
 			JComboBox p = (JComboBox)e.getSource();
 			String project = (String)p.getSelectedItem();
 			User client = new User(username, project); 

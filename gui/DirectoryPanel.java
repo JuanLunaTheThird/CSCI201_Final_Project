@@ -1,3 +1,4 @@
+package gui;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.io.File;
@@ -45,6 +46,7 @@ public class DirectoryPanel extends JPanel {
                 (TreeSelectionModel.SINGLE_TREE_SELECTION);
         tree.setShowsRootHandles(true);
 
+        
         JScrollPane scrollPane = new JScrollPane(tree);
         add(scrollPane);
     }
