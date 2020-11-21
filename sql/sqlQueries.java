@@ -1,4 +1,5 @@
-package test2;
+package sql;
+
 
 import java.io.File;
 import java.sql.Connection;

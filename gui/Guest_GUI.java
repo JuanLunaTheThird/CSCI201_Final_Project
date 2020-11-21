@@ -15,40 +15,34 @@ import javax.swing.JTextField;
 
 import serialized.User;
 import networking.ClientLoginFunctionality;
-public class LoginForm extends JPanel implements ActionListener {
+public class Guest_GUI extends JPanel implements ActionListener {
 
 	   /**
 	 * 
 	 */
 	   private static final long serialVersionUID = 1L;
 	   private JPanel panel;
-	   private JLabel userField, passwordField, message;
+	   private JLabel userField, message;
 	   private JTextField username;
-	   private JPasswordField password;
 	   private JButton submit;
 
 	
-	public LoginForm(String start) {
+	public Guest_GUI(String start) {
 		super(new BorderLayout());
 		if(start.equals("start")){
 			userField = new JLabel();
 			userField.setText("Username: ");
 			username = new JTextField();
 			
-			passwordField = new JLabel();
-			passwordField.setText("Password: ");
-			password = new JPasswordField();
+
 			
 			submit = new JButton("Submit");
-			
 			message = new JLabel();
-			
-			panel = new JPanel(new GridLayout(3,1));
+			panel = new JPanel(new GridLayout(2,1));
 			
 			panel.add(userField);
 			panel.add(username);
-			panel.add(passwordField);
-			panel.add(password);
+		
 			panel.add(submit);
 			panel.add(message);
 			
@@ -59,10 +53,10 @@ public class LoginForm extends JPanel implements ActionListener {
 	
 	public static void createAndShowGUI() {
 		
-		JFrame frame = new JFrame("Please enter your credentials");
+		JFrame frame = new JFrame("Please enter the username of whose projects you would like to see");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		LoginForm login = new LoginForm("start");
+		Guest_GUI login = new Guest_GUI("start");
 		login.setOpaque(true);
 		frame.setContentPane(login);
 		
@@ -75,15 +69,13 @@ public class LoginForm extends JPanel implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String user = username.getText();
-		char[] charPw = password.getPassword();
-		String pw = new String(charPw);
 		
 		if(user == null) {
 			
 		}
 		
-		if(user != "" && pw != "") {
-			User userTry = new User(user, pw, false);
+		if(user != "") {
+			User userTry = new User(user);
 			boolean authenticated = ClientLoginFunctionality.tryToLogin(userTry);
 			if(authenticated) {
 				JOptionPane.showMessageDialog(this, "Verified!");

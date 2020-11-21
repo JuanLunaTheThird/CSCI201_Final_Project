@@ -15,7 +15,7 @@ public class Client {
 		InputStream is;
 		ObjectInputStream ObjInput;
 		Scanner scan;
-		Message Msg;
+		FileBytes file;
 		String fname;
 	
 		try {
@@ -42,18 +42,18 @@ public class Client {
 				String byteString = null;
 				
 				
-				Message msg = (Message) ObjInput.readObject();
-				System.out.println("Server sent: " + msg.getMsg());
+				FileBytes serverFile = (FileBytes) ObjInput.readObject();
+				System.out.println("Server sent: " + serverFile.getRequestType());
 				System.out.println("Client time to talk");
 				String ClientMsg = scan.nextLine();
 				
-				if(msg.getFile() != null) {
-					System.err.println("You received a file! The file is: " + msg.getFileName());
+				if(serverFile.getFile() != null) {
+					System.err.println("You received a file! The file is: " + serverFile.getFileName());
 					
 				}
 				
 			
-				Message toServer = new Message(ClientMsg, bytes, fname);
+				FileBytes toServer = new FileBytes(ClientMsg, bytes, fname, "");
 				ObjOutput.writeObject(toServer);
 			}
 			

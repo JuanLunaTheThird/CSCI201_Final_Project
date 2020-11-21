@@ -1,3 +1,4 @@
+package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -5,6 +6,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -12,9 +14,12 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import fileIO.FileZip;
+import gui.FileExportSwingWorker;
+import serialized.User;
 
 
-public class UserGui extends JPanel 
+public class FileDisplayPanel extends JPanel 
                              implements ActionListener {
     
 	private static final long serialVersionUID = 1L;
@@ -22,13 +27,17 @@ public class UserGui extends JPanel
     private static String REMOVE_COMMAND = "Remove File";
     private static String IMPORT_COMMAND = "Import Project";
     private static String EXPORT_COMMAND = "Export Project";
+    private static String ADD_USER_COMMAND = "add_user";
     File root;
     private DirectoryPanel treePanel;
-
-    public UserGui(String start) {
+    User user;
+    String projectName;
+    public FileDisplayPanel(User user, boolean start) {
     	super(new BorderLayout());
     	
-    	if(start.equals("start")){
+    	this.user = user;
+    	
+    	if(start == true){
 	        //Create the components.
 	        root = getDir();
 	        treePanel = new DirectoryPanel(root);
@@ -50,7 +59,12 @@ public class UserGui extends JPanel
 	        exportButton.setActionCommand(EXPORT_COMMAND);
 	        exportButton.addActionListener(this);
 	        
-	
+	        JButton addUser = new JButton("Add a user to the project");
+	        addUser.setActionCommand(ADD_USER_COMMAND);
+	        addUser.addActionListener(this);
+	        
+	        
+	        
 	        //Lay everything out.
 	        treePanel.setPreferredSize(new Dimension(300, 150));
 	        add(treePanel, BorderLayout.CENTER);
@@ -59,7 +73,8 @@ public class UserGui extends JPanel
 	        panel.add(addButton);
 	        panel.add(removeButton); 
 	        panel.add(importButton);
-	        panel.add(removeButton);
+	        panel.add(exportButton);
+	        panel.add(addUser);
 	        add(panel, BorderLayout.SOUTH);
     	}
     }
@@ -123,9 +138,15 @@ public class UserGui extends JPanel
             //Remove button clicked
             treePanel.removeCurrentNode();
         } else if (IMPORT_COMMAND.equals(command)) {
-            //Clear button clicked.
+            
         }else if (EXPORT_COMMAND.equals(command)) {
-            //Clear button clicked.
+        	String srcdir = root.getPath();
+        	String targetdir = srcdir + File.separator + user.getProject() + ".zip";
+        	new FileExportSwingWorker(srcdir, targetdir).execute();
+        }else if (ADD_USER_COMMAND.equals(command)) {	//add a new user to the project
+        	System.err.println("entering if");
+        	AddUserPopup addUser = new AddUserPopup(projectName);
+        	addUser.addUser();
         }
     }
 
@@ -134,17 +155,18 @@ public class UserGui extends JPanel
      * this method should be invoked from the
      * event-dispatching thread.
      */
-    private static void createAndShowGUI() {
+    private void createAndShowGUI() {
     	
         //Create and set up the window.
         JFrame frame = new JFrame("Project Viewer");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         //Create and set up the content pane.
-        UserGui newContentPane = new UserGui("start");
+        FileDisplayPanel newContentPane = new FileDisplayPanel(this.user, true);
         newContentPane.setOpaque(true); //content panes must be opaque
         frame.setContentPane(newContentPane);
-
+        System.err.println("username");
+        System.err.println(user.getUsername());
         //Display the window.
         frame.pack();
         frame.setVisible(true);

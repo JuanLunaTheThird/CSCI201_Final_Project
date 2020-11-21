@@ -7,38 +7,45 @@ public class Packet implements Serializable {
 	 * 
 	 */
 	
-	private LoginAttempt login;
-	private Message message;
+	private User login;
+	private FileBytes file;
 	private String packetType;
-	private static String PACKET_TYPE_LOGIN = "login";
-	private static String PACKET_TYPE_MESSAGE = "message";
+	private static String PACKET_TYPE_USER = "user";
+	private static String PACKET_TYPE_FILE = "file";
 	private static String PACKET_TYPE_ERROR = "error";
 	
 	
-	public Packet(LoginAttempt loginAttempt) {
-		message = null;
-		login = loginAttempt;
-		packetType = PACKET_TYPE_LOGIN;
+	public Packet(User User) {
+		file = null;
+		login = User;
+		packetType = PACKET_TYPE_USER;
 	}
 	
-	public Packet(Message msg) {
+	public Packet(FileBytes msg) {
 		login = null;
-		message = msg;
-		packetType = PACKET_TYPE_MESSAGE;
+		file = msg;
+		packetType = PACKET_TYPE_FILE;
+	}
+	
+	
+	public Packet(User user, FileBytes file) {
+		this.login = user;
+		this.file = file;
+		packetType = PACKET_TYPE_FILE;
 	}
 	
 	public String getUsername(){
 	
-		if(packetType.equals(PACKET_TYPE_MESSAGE)) {
-			System.err.println("You're getting the username on a packet with no LoginAttempt");
+		if(packetType.equals(PACKET_TYPE_FILE)) {
+			System.err.println("You're getting the username on a packet with no User");
 			return null;
 		}
 		return login.getUsername();
 	}
 	
 	public String getPassword() {
-		if(packetType.equals(PACKET_TYPE_MESSAGE)) {
-			System.err.println("You're getting the password on a packet with no LoginAttempt");
+		if(packetType.equals(PACKET_TYPE_FILE)) {
+			System.err.println("You're getting the password on a packet with no User");
 			return null;
 		}
 		
@@ -46,43 +53,41 @@ public class Packet implements Serializable {
 	}
 	
 	public String getMsg() {
-		if(packetType.equals(PACKET_TYPE_LOGIN)) {
+		if(packetType.equals(PACKET_TYPE_USER)) {
 			System.err.println("You're getting the message on a packet with no Message");
 			return null;
 		}
-		return message.getMsg();
+		return file.getRequestType();
 	}
 	
-	public byte[] getFile() {
-		
-		if(packetType.equals(PACKET_TYPE_LOGIN)) {
-			System.err.println("You're getting the message on a packet with no Message");
-			return null;
-		}
-		
-		return message.getFile();
-	}
 	
 	public String getFileName() {
-		if(packetType.equals(PACKET_TYPE_LOGIN)) {
+		if(packetType.equals(PACKET_TYPE_USER)) {
 			System.err.println("You're getting the message on a packet with no Message");
 			return null;
 		}
-		return message.getFileName();
+		return file.getFileName();
 	}
 	
-	public String returnPacketType() {
+	public String getPacketType() {
 		
-		if(packetType.equals(PACKET_TYPE_LOGIN)) {
-			return PACKET_TYPE_LOGIN;
-		}else if(packetType.equals(PACKET_TYPE_MESSAGE)) {
-			return PACKET_TYPE_MESSAGE;
+		if(packetType.equals(PACKET_TYPE_USER)) {
+			return PACKET_TYPE_USER;
+		}else if(packetType.equals(PACKET_TYPE_FILE)) {
+			return PACKET_TYPE_FILE;
 		}
 		
 		
 		System.err.println("This packet is neither a message nor login");
 		return PACKET_TYPE_ERROR;
-		
+	}
+	
+	public User getUser() {
+		return this.login;
+	}
+	
+	public FileBytes getFile() {
+		return this.file;
 	}
 	
 	
