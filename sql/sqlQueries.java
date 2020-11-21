@@ -170,6 +170,35 @@ class sqlQueries {
 		return projects;
 	}
 
+	public static String[] userProjectNames(String username)
+	{
+		Connection conn = getConnection();
+		ArrayList<String> arrlist = new ArrayList<String>();
+		String[] projects = null;
+		String checkQuery = "SELECT projects.project FROM userstoprojects JOIN projects ON projects.stored_directory = project_directory WHERE userstoprojects.username = \"" + username + "\";";
+		try(Statement stm = conn.createStatement())
+		{
+			ResultSet res = stm.executeQuery(checkQuery);
+			while(res.next())
+			{
+				arrlist.add(res.getString(1));
+			}
+
+		}
+		catch(SQLException e)
+		{
+			e.printStackTrace();
+		}
+
+		projects = new String[arrlist.size()];
+		for(int i = 0; i < arrlist.size(); i++)
+		{
+			projects[i] = directoryToProjectName(arrlist.get(i));
+		}
+		return projects;
+	}
+
+
 	/*
 	 * Checks if username is in the database, returns false if it is
 	 * Otherwise inserts it into database and returns true
