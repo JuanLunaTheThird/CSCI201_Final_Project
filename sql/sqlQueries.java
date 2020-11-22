@@ -1,21 +1,19 @@
 package sql;
 
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 
-class sqlQueries {
+public class sqlQueries {
 
 	private static Connection getConnection()
 	{
 		Connection conn = null;
-		String host = "jdbc:mysql://104.12.140.24:3306/prohub";
+		String host = "jdbc:mysql://192.168.1.104:3306/prohub";
 		String username = "jonah";
 		String password = "Funshine!";
 		try {
@@ -39,7 +37,7 @@ class sqlQueries {
 	public static boolean createNewProject(String username, String project)
 	{
 		Connection conn = getConnection();
-		String path = "C:\\\\Users\\\\juan\\\\Desktop\\\\Juan\\\\Prohub\\\\" + username + "\\\\" + project;
+		String path = "C:\\\\Users\\\\juanl\\\\Desktop\\\\Prohub\\\\" + username + "\\\\" + project;
 		System.out.println(path);
 		String checkQuery = "SELECT * FROM userstoprojects WHERE username = \"" + username + "\" && project_directory = \"" + path + "\";";
 		try(Statement stm = conn.createStatement())
@@ -86,9 +84,7 @@ class sqlQueries {
 	public static String getProjectPath(String project, String username)
 	{
 		Connection conn = getConnection();
-		String path = "C:\\\\Users\\\\juan\\\\Desktop\\\\Juan\\\\Prohub\\\\" + username + "\\\\" + project;
-		System.out.println(path);
-		String checkQuery = "SELECT * FROM projects WHERE stored_directory = \"" + path + "\";";
+		String checkQuery = "SELECT projects.stored_directory FROM projects WHERE project = \"" + project + "\" AND username = \"" + username + "\" ;";
 		try(Statement stm = conn.createStatement())
 		{
 			ResultSet res = stm.executeQuery(checkQuery);
@@ -98,7 +94,7 @@ class sqlQueries {
 			}
 			else
 			{
-				return res.getString(1);
+				 return res.getString(1);
 			}
 		}
 		catch(SQLException e)
@@ -111,12 +107,12 @@ class sqlQueries {
 	/*
 	 * returns false if the user is already added to the project
 	 * returns true if successful
-	 *
+	 * should check if the user exists
 	 */
 	public static boolean addUserToProject(String username, String project, String owner)
 	{
 		Connection conn = getConnection();
-		String path = "C:\\\\Users\\\\juan\\\\Desktop\\\\Juan\\\\Prohub\\\\" + owner + "\\\\" + project;
+		String path = "C:\\\\Users\\\\juanl\\\\Desktop\\\\Prohub\\\\" + owner + "\\\\" + project;
 		String checkQuery = "SELECT * FROM userstoprojects WHERE username = \"" + username + "\" AND project_directory = \"" + path + "\";";
 		try(Statement stm = conn.createStatement())
 		{
@@ -164,12 +160,43 @@ class sqlQueries {
 		}
 
 		projects = new String[arrlist.size()];
+		System.err.println(username + "'s projects are: ");
 		for(int i = 0; i < arrlist.size(); i++)
 		{
 			projects[i] = arrlist.get(i);
 		}
 		return projects;
 	}
+	
+	public static String[] ownersOfProjectsForUser(String username) {
+		String[] owners = null;
+		Connection conn = getConnection();
+		ArrayList<String> arrlist = new ArrayList<String>();
+		String checkQuery = "SELECT projects.username FROM projects JOIN userstoprojects ON projects.stored_directory = project_directory WHERE userstoprojects.username = \"" + username + "\";";
+		try(Statement stm = conn.createStatement())
+		{
+			ResultSet res = stm.executeQuery(checkQuery);
+			while(res.next())
+			{
+				arrlist.add(res.getString(1));
+			}
+
+		}
+		catch(SQLException e)
+		{
+			e.printStackTrace();
+		}
+
+		owners = new String[arrlist.size()];
+		for(int i = 0; i < arrlist.size(); i++)
+		{
+			owners[i] = arrlist.get(i);
+			System.err.println(owners[i]);
+		}
+		return owners;
+		
+	}
+	
 
 	public static String[] userProjectNames(String username)
 	{
@@ -268,7 +295,7 @@ class sqlQueries {
 	public static String directoryToProjectName(String directory)
 	{
 		String [] arr = directory.split("\\", 10);
-		return arr[arr.length - 1];
+		return arr[arr.length];
 	}
 
 	public static String directoryToOwner(String directory)

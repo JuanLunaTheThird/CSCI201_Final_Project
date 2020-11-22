@@ -1,6 +1,5 @@
 package networking;
 import java.io.*;
-import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -11,70 +10,75 @@ import serialized.Packet;
 
 
 public class FileTransfer {
-	private Socket socket;
 	private FileOutputStream fos;
-	private String projectdir;
+	private ObjectOutputStream ObjOutput;
+	private ObjectOutputStream serverOutput;
+	private ObjectInputStream ObjInput;
+
 	
-	public FileTransfer(Socket client){
-		socket = client;
-		fos = null;
+	public FileTransfer(ObjectOutputStream oos, ObjectInputStream iis) {
+		this.ObjOutput = oos;
+		this.ObjInput = iis;
 	}
 	
-	public FileTransfer(String projectdir){
+	public FileTransfer(ObjectOutputStream oos) {
+		this.serverOutput = oos;
+	}
+	
+	
+	public void sendFileToClient(String fname) {
+		Path path = Paths.get(fname);
 		try {
-			String juanServer = "104.12.140.24";
-			socket = new Socket(juanServer, 8080);
+			byte[] bytes = Files.readAllBytes(path);
+			
+			FileBytes toClient = new FileBytes(fname, bytes);
+			Packet packet = new Packet(toClient);
+			serverOutput.writeObject(packet);
 		} catch (IOException e) {
+			
 			e.printStackTrace();
 		}
-		this.projectdir = projectdir;
-		fos = null;
 	}
 	
-	public void receiveFile() {
+	
+	
+	public String receiveFile(String projectdir) {
 		fos = null;
-		InputStream is;
+		String targetdir = null;
 		try {
-			is = socket.getInputStream();
-			ObjectInputStream ObjInput = new ObjectInputStream(is);
 			Packet packet = (Packet) ObjInput.readObject();
 			FileBytes file = packet.getFile();
 			byte[] bytes = file.getFile();
-			
+			targetdir = projectdir + File.separator + ".zip";
 			int lastpost = projectdir.lastIndexOf(File.separator);
 			
 			if(lastpost == -1) {
 				System.err.println("error processing string of project dir");
 			}
 			
-			fos = new FileOutputStream(projectdir + File.separator + ".zip");
+			fos = new FileOutputStream(targetdir);
 			fos.write(bytes);
 			
 			fos.close();
-			ObjInput.close();
-			socket.close();
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-		
+		return targetdir;
 	}
 	
-	public void sendFile(String fname) {
+	public void sendFileToServer(String fname, String project, String owner) {
 		Path path = Paths.get(fname);
 		try {
 			byte[] bytes = Files.readAllBytes(path);
 			
-			OutputStream is = socket.getOutputStream();
-			ObjectOutputStream ObjOutput = new ObjectOutputStream(is);
 			
-			FileBytes toClient = new FileBytes("export", bytes,"","");
+			
+			FileBytes toClient = new FileBytes(owner, fname, project, "import", bytes);
 			
 			Packet packet = new Packet(toClient);
 			ObjOutput.writeObject(packet);
-			ObjOutput.close();
-			is.close();
 		} catch (IOException e) {
 			
 			e.printStackTrace();

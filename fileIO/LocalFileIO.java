@@ -9,14 +9,22 @@ public class LocalFileIO {
 	
 	
 	
-	public static void receiveFile(Object msg, String dir, String fname) {
+	public static String receiveFile(Object msg, String dir, String fname) {
 		FileOutputStream fos = null;
 		byte[] bytes = (byte[]) msg;
+		String wrote_to = dir + File.separator + fname;
+		File mkdir = new File(dir);
+		mkdir.mkdirs();
+		System.err.println("in receiveFile function dir is " + dir);
+		System.err.println(" and the filename is " + fname);
+		
+		
+		
+		
 		try {
-			fos = new FileOutputStream(dir + "\\" + fname);
+			fos = new FileOutputStream(wrote_to);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println(wrote_to);
 		}
 		try {
 			fos.write(bytes);
@@ -30,6 +38,7 @@ public class LocalFileIO {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return wrote_to;
 	}
 	
 	public static byte[] sendFile(String fname) {

@@ -46,11 +46,10 @@ public class FileZipForNetworkIO {
 				BufferedInputStream input = new BufferedInputStream(new FileInputStream(file));
 				byte[] bytes = new byte[4096];
 				int read = 0;
-				long bytesRead = 0;
 				while((read = input.read(bytes)) != -1) {
 					zip.write(bytes, 0 ,read);
-					bytesRead += read;
 				}
+				input.close();
 				zip.closeEntry();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -74,13 +73,12 @@ public class FileZipForNetworkIO {
 		zip.putNextEntry(new ZipEntry(file.getName()));
 		BufferedInputStream input = new BufferedInputStream(new FileInputStream(file));
 		System.out.println(file.getCanonicalPath());
-		long bytesRead = 0;
 		byte[] bytes = new byte[4096];
 		int read = 0;
 		while((read = input.read(bytes)) != -1) {
 			zip.write(bytes, 0 ,read);
-			bytesRead += read;
 		}
+		input.close();
 		zip.closeEntry();
 	}
 	

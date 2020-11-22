@@ -4,18 +4,19 @@ import java.awt.GridLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import serialized.User;
-import networking.ClientLoginFunctionality;
-public class Guest_GUI extends JPanel implements ActionListener {
+import networking.NetworkFunctions;
+public class GuestUserSelect extends JPanel implements ActionListener {
 
 	   /**
 	 * 
@@ -25,15 +26,19 @@ public class Guest_GUI extends JPanel implements ActionListener {
 	   private JLabel userField, message;
 	   private JTextField username;
 	   private JButton submit;
+	   private ObjectInputStream ois;
+	   private ObjectOutputStream oos;
 
 	
-	public Guest_GUI(String start) {
-		super(new BorderLayout());
-		if(start.equals("start")){
+	public GuestUserSelect(ObjectOutputStream oos, ObjectInputStream ois) {
+			super(new BorderLayout());
+		
+		
 			userField = new JLabel();
 			userField.setText("Username: ");
 			username = new JTextField();
-			
+			this.oos = oos;
+			this.ois = ois;
 
 			
 			submit = new JButton("Submit");
@@ -48,15 +53,15 @@ public class Guest_GUI extends JPanel implements ActionListener {
 			
 			submit.addActionListener(this);
 			add(panel, BorderLayout.CENTER);
-		}
+		
 	}
 	
-	public static void createAndShowGUI() {
+	public void createAndShowGUI() {
 		
 		JFrame frame = new JFrame("Please enter the username of whose projects you would like to see");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		Guest_GUI login = new Guest_GUI("start");
+		GuestUserSelect login = new GuestUserSelect(oos, ois);
 		login.setOpaque(true);
 		frame.setContentPane(login);
 		
@@ -75,12 +80,12 @@ public class Guest_GUI extends JPanel implements ActionListener {
 		}
 		
 		if(user != "") {
-			User userTry = new User(user);
-			boolean authenticated = ClientLoginFunctionality.tryToLogin(userTry);
+			User userTry = new User(user, "", "guest");
+			boolean authenticated = NetworkFunctions.tryToLogin(userTry, oos, ois);
 			if(authenticated) {
-				JOptionPane.showMessageDialog(this, "Verified!");
+				JOptionPane.showMessageDialog(this, "Real user!");
 				((Window) this.getRootPane().getParent()).dispose();
-				DisplayUserProjects displayProjects = new DisplayUserProjects(user);
+				GuestDisplayProjects displayProjects = new GuestDisplayProjects(user, oos, ois);
 				displayProjects.loadProject();
 			}
 			else {

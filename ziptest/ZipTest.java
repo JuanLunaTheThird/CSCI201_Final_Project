@@ -1,6 +1,5 @@
 package ziptest;
 
-import java.io.File;
 import fileIO.FileZip;
 
 
@@ -8,20 +7,17 @@ import fileIO.FileZip;
 public class ZipTest {
 	
     public static void main(String[] args) {
-    	File file = new File("C:\\Users\\juanl\\Desktop\\fenox");
-    	
-    	File test = new File("C:\\Users\\juanl\\Desktop\\fenox\\src.rar");
-    	
+    
     	
     
     	
     	
-    	String srcdir = "C:\\Users\\juanl\\Desktop\\fenox";
-    	String targetdir = "C:\\Users\\juanl\\Desktop\\Prohub\\fenox.zip";
+    	String srcdir = "C:\\Users\\juanl\\Desktop\\to zip";
+    	String targetdir = "C:\\Users\\juanl\\Desktop\\write to\\pog.zip";
     
     	FileZip fz = new FileZip(srcdir, targetdir);
-    	fz.ZipDir();
-    	String newsrc = "C:\\Users\\juanl\\Desktop\\Prohub";
+    	fz.zipDir();
+    	String newsrc = "C:\\Users\\juanl\\Desktop\\write to\\";
     	FileZip unzip = new FileZip(targetdir, newsrc);
     	unzip.unzipDir();
     }

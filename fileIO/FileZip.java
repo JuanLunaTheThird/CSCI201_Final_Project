@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,7 +32,6 @@ public class FileZip {
 	public void unzipDir() {
 		ZipInputStream zip = null;
 		FileInputStream fis = null;
-		
 		
 		try {
 			fis = new FileInputStream(srcdir);
@@ -64,18 +64,34 @@ public class FileZip {
 			e.printStackTrace();
 		}
 		System.out.println("file unzipped");
+	
+	}
+	
+	private static boolean isEmptyDir(Path dir) throws IOException {
+		 try(DirectoryStream<Path> dirStream = Files.newDirectoryStream(dir)) {
+		        return !dirStream.iterator().hasNext();
+		    }
 	}
 	
 	
 	
-	
-	
-	public void ZipDir() {
+	public void zipDir() {
+		
+		Path path = Paths.get(srcdir);
+		
+		try {
+			if(isEmptyDir(path)) {
+				return;
+			}
+		} catch (IOException e1) {
+			System.err.println("empty or doesn't exist");
+		}
+		
 		fillFiles(new File(srcdir));
-		byte[] buf = new byte[1024];
+		byte[] buf = new byte[4096];
 		FileOutputStream fileoutput = null;
 		ZipOutputStream zip = null;
-		
+		System.err.println(targetdir);
 		try {
 			fileoutput = new FileOutputStream(targetdir);
 			zip = new ZipOutputStream(fileoutput);
@@ -85,8 +101,10 @@ public class FileZip {
 			
 			
             for (String file : files) {
-            	
-                ZipEntry ze = new ZipEntry(new File(srcdir).getName() + File.separator + file);
+            	//original in case of errors 
+            	//ZipEntry ze = new ZipEntry(new File(srcdir).getName() + File.separator + file);
+
+                ZipEntry ze = new ZipEntry(file);
                 zip.putNextEntry(ze);
                 try {
                     in = new FileInputStream(srcdir + File.separator + file);

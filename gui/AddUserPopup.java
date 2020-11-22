@@ -4,17 +4,18 @@ import java.awt.GridLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import serialized.User;
-import networking.ClientLoginFunctionality;
+import networking.NetworkFunctions;
 public class AddUserPopup extends JPanel implements ActionListener {
 
 	   /**
@@ -27,10 +28,18 @@ public class AddUserPopup extends JPanel implements ActionListener {
 	   private JButton submit;
 	   private final String reqType = "add_user";
 	   private final String project;
+	   private final String project_owner;
+	   private ObjectInputStream ois;
+	   private ObjectOutputStream oos;
 	
-	public AddUserPopup(String project) {
+	public AddUserPopup(String project, String project_owner, ObjectOutputStream oos, ObjectInputStream ois) {
 		super(new BorderLayout());
+		
+		this.oos = oos;
+		this.ois = ois;
 		this.project = project;
+		this.project_owner = project_owner;
+		
 		userField = new JLabel();
 		userField.setText("Username: ");
 		username = new JTextField();
@@ -54,8 +63,7 @@ public class AddUserPopup extends JPanel implements ActionListener {
 		
 		JFrame frame = new JFrame("Please enter your credentials");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		String p = project;
-		AddUserPopup login = new AddUserPopup(p);
+		AddUserPopup login = new AddUserPopup(project, project_owner, oos, ois);
 		login.setOpaque(true);
 		frame.setContentPane(login);
 		
@@ -69,13 +77,14 @@ public class AddUserPopup extends JPanel implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		String user = username.getText();
 		
-		User toAdd = new User(user, project, reqType);
-		boolean success = ClientLoginFunctionality.sendUsertoAdd(toAdd);
+		User toAdd = new User(user, project_owner, project, reqType);
+		boolean success = NetworkFunctions.sendUsertoAdd(toAdd, oos, ois);
 		if(success) {
 			JOptionPane.showMessageDialog(this, "Added!");
 			((Window) this.getRootPane().getParent()).dispose();
 		}else {
 			message.setText("Problem adding that user");
+			((Window) this.getRootPane().getParent()).dispose();
 		}
 	}
 	

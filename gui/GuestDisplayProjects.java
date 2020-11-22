@@ -4,18 +4,19 @@ import java.awt.GridLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import networking.GetUserProjects;
-import serialized.Packet;
+import networking.NetworkFunctions;
 import serialized.User;
 
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+@SuppressWarnings("serial")
 public class GuestDisplayProjects extends JPanel implements ActionListener {
 	private JPanel panel;
 	private String username;
@@ -23,48 +24,59 @@ public class GuestDisplayProjects extends JPanel implements ActionListener {
 	private final String SELECT_PROJ = "SELECT_PROJ";
 	private JLabel projectField;
 	private JTextField projName;
-	
-	
-	public GuestDisplayProjects(String username) {
+	private ObjectInputStream ois;
+	private ObjectOutputStream oos;
+	private User projects_and_owners;
+	public GuestDisplayProjects(String username,  ObjectOutputStream oos, ObjectInputStream ois) {
 		
 		
 		super(new BorderLayout());	
 		this.username = username;
-		String [] projects = {"On mamas", "Diego"};
-				//loadUserProjects();
-		JComboBox<String> projectList = new JComboBox<String>(projects);
+		this.ois = ois;
+		this.oos = oos;
+		projects_and_owners = loadUserProjects();
+		int num_projects = projects_and_owners.getProjects().length;
 		
-		projectList.setActionCommand(SELECT_PROJ);
-		projectList.addActionListener(this);
+		String[] projects = new String[num_projects];
 		
-		panel = new JPanel(new GridLayout(2,1));
-
+		for(int i =0; i < num_projects; ++i) {
+			projects[i] = "Owner: " + projects_and_owners.getProjectOwners()[i] + "Project: " + projects_and_owners.getProjects()[i];
+		}
 		
-		projectField = new JLabel();
-		projectField.setText("Select a project");
 		projName = new JTextField();
 		
+		if(projects.length > 0) {
+			JComboBox<String> projectList = new JComboBox<String>(projects);
+			projectList.setActionCommand(SELECT_PROJ);
+			projectList.addActionListener(this);
+			projectField = new JLabel();
+			projectField.setText("Select a working project");
+			panel = new JPanel(new GridLayout(1,1));
+			panel.add(projectList);
+			
+		}else {
+			panel = new JPanel(new GridLayout(1,1));
+		}
 		
-		panel.add(projectField);
+		
 		panel.add(projName);
-		panel.add(projectList);
 		add(panel, BorderLayout.CENTER);
 	}
 
 	
 	
 	
-	private String[] loadUserProjects() {
-		User projectRequest = new User(username);
-		String[] projects = null;
-		projects = GetUserProjects.getUserProjects(projectRequest);
+	private User loadUserProjects() {
+		User projectRequest = new User(username, "", "guest");
+		User projects = null;
+		projects = NetworkFunctions.getUserProjects(projectRequest, oos, ois);
 		return projects;
 	}
 	
 	public void createAndShowGUI(){
 		JFrame frame = new JFrame("Select a current project or register a new one");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		GuestDisplayProjects displayProjects = new GuestDisplayProjects(username);
+		GuestDisplayProjects displayProjects = new GuestDisplayProjects(username, oos, ois);
 		displayProjects.setOpaque(true);
 		frame.setContentPane(displayProjects);
 		frame.pack();
@@ -84,11 +96,17 @@ public class GuestDisplayProjects extends JPanel implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		String cmd = e.getActionCommand();
 		if(cmd.equals(SELECT_PROJ)) {
-			JComboBox p = (JComboBox)e.getSource();
-			String project = (String)p.getSelectedItem();
-			User client = new User(username, project); 
+			JComboBox<?> p = (JComboBox<?>)e.getSource();
+			int idx = p.getSelectedIndex();
+			String project_owner = projects_and_owners.getProjectOwners()[idx];
+			String project = projects_and_owners.getProjects()[idx];
+			
+			System.err.println(project_owner + " " + project);
+			
+			
+			User client = new User(username, project);
 			((Window) this.getRootPane().getParent()).dispose();
-			FileDisplayPanel gui = new FileDisplayPanel(client, false);
+			GuestDisplayPanel gui = new GuestDisplayPanel(client,false, oos, ois);
 			gui.startProject();
 		}
 

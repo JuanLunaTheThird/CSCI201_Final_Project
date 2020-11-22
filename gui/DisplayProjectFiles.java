@@ -1,3 +1,4 @@
+package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -5,6 +6,8 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -12,9 +15,11 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import networking.NetworkFunctions;
+import serialized.User;
 
 
-public class UserGui extends JPanel 
+public class DisplayProjectFiles extends JPanel 
                              implements ActionListener {
     
 	private static final long serialVersionUID = 1L;
@@ -22,13 +27,23 @@ public class UserGui extends JPanel
     private static String REMOVE_COMMAND = "Remove File";
     private static String IMPORT_COMMAND = "Import Project";
     private static String EXPORT_COMMAND = "Export Project";
+    private static String ADD_USER_COMMAND = "add_user";
     File root;
     private DirectoryPanel treePanel;
-
-    public UserGui(String start) {
+    User user;
+    String projectName;
+    private ObjectInputStream ois;
+	private ObjectOutputStream oos;
+    private String project_owner;
+    
+    public DisplayProjectFiles(User user, String project_owner, boolean start,  ObjectOutputStream oos, ObjectInputStream ois) {
     	super(new BorderLayout());
-    	
-    	if(start.equals("start")){
+    	this.projectName = user.getProject();
+    	this.project_owner = project_owner;
+    	this.user = user;
+    	this.oos = oos;
+		this.ois = ois;
+    	if(start == true){
 	        //Create the components.
 	        root = getDir();
 	        treePanel = new DirectoryPanel(root);
@@ -50,7 +65,12 @@ public class UserGui extends JPanel
 	        exportButton.setActionCommand(EXPORT_COMMAND);
 	        exportButton.addActionListener(this);
 	        
-	
+	        JButton addUser = new JButton("Add a user to the project");
+	        addUser.setActionCommand(ADD_USER_COMMAND);
+	        addUser.addActionListener(this);
+	        
+	        
+	        
 	        //Lay everything out.
 	        treePanel.setPreferredSize(new Dimension(300, 150));
 	        add(treePanel, BorderLayout.CENTER);
@@ -59,7 +79,8 @@ public class UserGui extends JPanel
 	        panel.add(addButton);
 	        panel.add(removeButton); 
 	        panel.add(importButton);
-	        panel.add(removeButton);
+	        panel.add(exportButton);
+	        panel.add(addUser);
 	        add(panel, BorderLayout.SOUTH);
     	}
     }
@@ -118,33 +139,47 @@ public class UserGui extends JPanel
         String command = e.getActionCommand();
         
         if (ADD_COMMAND.equals(command)) {
+        	//add a file to the directory and update it on the gui
            addFileToDir();
         } else if (REMOVE_COMMAND.equals(command)) {
             //Remove button clicked
             treePanel.removeCurrentNode();
         } else if (IMPORT_COMMAND.equals(command)) {
-            //Clear button clicked.
+        	//request all current files from server
+        	User project_req = new User(project_owner, user.getProject(),"file_request");
+            NetworkFunctions.importProject(project_req,root.getAbsolutePath() , oos, ois);
+        	treePanel.clear();
+        	populateTree(treePanel, root);
         }else if (EXPORT_COMMAND.equals(command)) {
-            //Clear button clicked.
+        	String srcdir = root.getPath();
+        	String targetdir = srcdir + File.separator + user.getProject() + ".zip";
+        	new FileExportSwingWorker(srcdir, targetdir, projectName, project_owner,  ois, oos).execute();
+        	
+        	
+        }else if (ADD_USER_COMMAND.equals(command)) {	//add a new user to the project
+        	AddUserPopup addUser = new AddUserPopup(projectName,project_owner, oos, ois);
+        	addUser.addUser();
         }
     }
+    
 
     /**
      * Create the GUI and show it.  For thread safety,
      * this method should be invoked from the
      * event-dispatching thread.
      */
-    private static void createAndShowGUI() {
+    private void createAndShowGUI() {
     	
         //Create and set up the window.
         JFrame frame = new JFrame("Project Viewer");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         //Create and set up the content pane.
-        UserGui newContentPane = new UserGui("start");
+        DisplayProjectFiles newContentPane = new DisplayProjectFiles(this.user, project_owner, true, oos, ois);
         newContentPane.setOpaque(true); //content panes must be opaque
         frame.setContentPane(newContentPane);
-
+        System.err.println("username");
+        System.err.println(user.getUsername());
         //Display the window.
         frame.pack();
         frame.setVisible(true);

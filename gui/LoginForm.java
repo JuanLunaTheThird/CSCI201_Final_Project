@@ -4,6 +4,8 @@ import java.awt.GridLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -14,7 +16,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import serialized.User;
-import networking.ClientLoginFunctionality;
+import networking.NetworkFunctions;
 public class LoginForm extends JPanel implements ActionListener {
 
 	   /**
@@ -26,11 +28,17 @@ public class LoginForm extends JPanel implements ActionListener {
 	   private JTextField username;
 	   private JPasswordField password;
 	   private JButton submit;
-
+	   private final String login_or_register;
+	   private ObjectInputStream ois;
+	   private ObjectOutputStream oos;
 	
-	public LoginForm(String start) {
-		super(new BorderLayout());
-		if(start.equals("start")){
+	public LoginForm(String login_or_register, ObjectOutputStream oos, ObjectInputStream ois) {
+			super(new BorderLayout());
+			
+			this.login_or_register = login_or_register;
+			this.oos = oos;
+			this.ois = ois;
+			
 			userField = new JLabel();
 			userField.setText("Username: ");
 			username = new JTextField();
@@ -54,15 +62,15 @@ public class LoginForm extends JPanel implements ActionListener {
 			
 			submit.addActionListener(this);
 			add(panel, BorderLayout.CENTER);
-		}
+		
 	}
 	
-	public static void createAndShowGUI() {
+	public void createAndShowGUI() {
 		
 		JFrame frame = new JFrame("Please enter your credentials");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		LoginForm login = new LoginForm("start");
+		LoginForm login = new LoginForm(login_or_register, oos, ois);
 		login.setOpaque(true);
 		frame.setContentPane(login);
 		
@@ -83,16 +91,34 @@ public class LoginForm extends JPanel implements ActionListener {
 		}
 		
 		if(user != "" && pw != "") {
-			User userTry = new User(user, pw, false);
-			boolean authenticated = ClientLoginFunctionality.tryToLogin(userTry);
-			if(authenticated) {
-				JOptionPane.showMessageDialog(this, "Verified!");
-				((Window) this.getRootPane().getParent()).dispose();
-				DisplayUserProjects displayProjects = new DisplayUserProjects(user);
-				displayProjects.loadProject();
+			
+			
+			if(login_or_register.equals("login")) {
+				User userTry = new User(user, pw, true);
+				boolean authenticated = NetworkFunctions.tryToLogin(userTry, oos, ois);
+				if(authenticated) {
+					JOptionPane.showMessageDialog(this, "Verified!");
+					((Window) this.getRootPane().getParent()).dispose();
+					DisplayUserProjects displayProjects = new DisplayUserProjects(user, oos, ois);
+					displayProjects.loadProject();
+				}
+				else {
+					message.setText("Invalid Credentials");
+				}
+					
+			}else if(login_or_register.equals("register")) {
+				User userTry = new User(user, pw, false);
+				boolean authenticated = NetworkFunctions.registerUser(userTry, oos, ois);
+				if(authenticated) {
+					JOptionPane.showMessageDialog(this, "Successfully added!");
+					((Window) this.getRootPane().getParent()).dispose();
+					DisplayUserProjects displayProjects = new DisplayUserProjects(user, oos, ois);
+					displayProjects.loadProject();
+				}
 			}
+		
 			else {
-				message.setText("Invalid Credentials");
+				message.setText("Username already exists");
 			}
 		}else {
 			message.setText("Please enter credentials");

@@ -4,6 +4,13 @@ import java.awt.GridLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -18,7 +25,9 @@ public class MainGUI extends JPanel implements ActionListener {
 	private static String LOGIN = "Login";
     private static String REGISTER = "Register";
     private static String GUEST = "Guest Login";
-	
+    
+    
+    
 	public MainGUI() {
 		super(new BorderLayout());
 		
@@ -64,18 +73,38 @@ public class MainGUI extends JPanel implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
         String command = e.getActionCommand();
-        
-        if (LOGIN.equals(command)) {
-			((Window) this.getRootPane().getParent()).dispose();
-			LoginForm loginForm = new LoginForm("");
-			loginForm.addCredentials();
-        } else if (REGISTER.equals(command)) {
-        	((Window) this.getRootPane().getParent()).dispose();
-            LoginForm registerForm = new LoginForm("");
-            registerForm.addCredentials();
-        }else if(GUEST.equals(GUEST)) {
-        	((Window) this.getRootPane().getParent()).dispose();
-        }
+        String juanServer = "104.12.140.24";
+        try {
+        	System.err.println("here");
+			@SuppressWarnings("resource")
+			Socket client = new Socket(juanServer, 8080);
+			OutputStream os = client.getOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(os);
+			InputStream is = client.getInputStream();
+			ObjectInputStream ois = new ObjectInputStream(is);
+			
+			
+			if (LOGIN.equals(command)) {
+				((Window) this.getRootPane().getParent()).dispose();
+				LoginForm loginForm = new LoginForm("login", oos, ois);
+				loginForm.addCredentials();
+	        } else if (REGISTER.equals(command)) {
+	        	((Window) this.getRootPane().getParent()).dispose();
+	            LoginForm registerForm = new LoginForm("register", oos, ois);
+	            registerForm.addCredentials();
+	        }else if(GUEST.equals(GUEST)) {
+	        	((Window) this.getRootPane().getParent()).dispose();
+	        	GuestUserSelect guest = new GuestUserSelect(oos, ois);
+	        	guest.addCredentials();
+	        }
+			
+			
+		} catch (UnknownHostException e1) {
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+  
     }
 	public static void main(String[] args) {
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {

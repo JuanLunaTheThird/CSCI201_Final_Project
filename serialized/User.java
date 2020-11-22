@@ -1,6 +1,7 @@
 package serialized;
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class User implements Serializable {
 	
 
@@ -8,9 +9,11 @@ public class User implements Serializable {
 	private String username;
 	private String password;
 	private String[] userProjects;
+	private String[] project_owners;
 	private String project;
 	private String userType;
 	private boolean RegisterOrLogin;
+	private String owner;
 	
 	public User(String user, String pw, boolean s){
 		this.username = user;
@@ -34,23 +37,38 @@ public class User implements Serializable {
 		this.userType = type;
 	}
 	
+	public User(String user, String owner, String project, String type) {
+		this.username = user;
+		this.project = project;
+		this.userType = type;
+		this.owner = owner;
+	}
+	
 	public User(String user) {
 		this.username = user;
 	}
 	
-	public User(String user, String pw, boolean s, String[] projects){
+	
+	public User(String user, String[] projects, String[] owners){
 		this.username = user;
-		this.password = pw;
-		RegisterOrLogin = s;
-		userProjects = projects;
+		this.userProjects = projects;
+		this.project_owners =owners;
 	}
 	
 	public String[] getProjects() {
 		return userProjects;
 	}
 	
+	public String[] getProjectOwners() {
+		return this.project_owners;
+	}
+	
 	public String getProject() {
 		return project;
+	}
+	
+	public String getProjectOwner() {
+		return owner;
 	}
 	
 	public String getUserType() {
@@ -61,6 +79,11 @@ public class User implements Serializable {
 	public String getUsername() {
 		return username;
 	}
+	
+	public void setSuccess(boolean s) {
+		this.RegisterOrLogin = s;
+	}
+	
 	
 	public String getPassword() {
 		return password;

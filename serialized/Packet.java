@@ -1,6 +1,7 @@
 package serialized;
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class Packet implements Serializable {
 
 	/**
@@ -37,8 +38,7 @@ public class Packet implements Serializable {
 	public String getUsername(){
 	
 		if(packetType.equals(PACKET_TYPE_FILE)) {
-			System.err.println("You're getting the username on a packet with no User");
-			return null;
+			return file.getOwnerName();
 		}
 		return login.getUsername();
 	}

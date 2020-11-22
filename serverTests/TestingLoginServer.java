@@ -6,7 +6,7 @@ import java.net.*;
 
 import serialized.User;
 import serialized.Packet;
-import networking.ServerLoginAuthentication;
+import networking.NetworkFunctions;
 
 import java.io.*;
 
@@ -19,7 +19,7 @@ public class TestingLoginServer {
 		ObjectOutputStream serverOutput;
 		InputStream is;
 		ObjectInputStream serverInput;
-		User login, authStatus;
+		User authStatus;
 		Socket client;
 		Packet packet;
 		
@@ -29,7 +29,6 @@ public class TestingLoginServer {
 			
 			while(true) {
 				authStatus = null;
-				login = null;
 				client = server.accept();
 				System.err.println(client.getInetAddress());
 				os = client.getOutputStream();
@@ -38,7 +37,7 @@ public class TestingLoginServer {
 				serverInput = new ObjectInputStream(is);
 				
 				System.err.println("trying to read login");
-				packet = ServerLoginAuthentication.receiveClientLogin(serverInput);
+				packet = NetworkFunctions.receiveClientLogin(serverInput);
 				System.err.println("Got packet");
 				
 				if(packet != null) {
@@ -47,10 +46,10 @@ public class TestingLoginServer {
 					if(packet.getUsername().equals("pog") && packet.getPassword().equals("pog")) {
 						System.err.println("User authenticated");
 						authStatus = new User(packet.getUsername(), packet.getPassword(), true);
-						ServerLoginAuthentication.sendUserToClient(serverOutput, authStatus);
+						NetworkFunctions.sendUserToClient(serverOutput, authStatus);
 					}else {
 						authStatus = new User(packet.getUsername(), packet.getPassword(), false);
-						ServerLoginAuthentication.sendUserToClient(serverOutput, authStatus);
+						NetworkFunctions.sendUserToClient(serverOutput, authStatus);
 					}
 				}
 				

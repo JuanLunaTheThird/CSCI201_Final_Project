@@ -6,7 +6,8 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -14,8 +15,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import fileIO.FileZip;
-import gui.FileExportSwingWorker;
+import networking.NetworkFunctions;
 import serialized.User;
 
 
@@ -28,13 +28,20 @@ public class GuestDisplayPanel extends JPanel
     private DirectoryPanel treePanel;
     User user;
     String projectName;
-    public GuestDisplayPanel(User user, boolean start) {
+    private ObjectInputStream ois;
+	private ObjectOutputStream oos;
+    
+    
+    public GuestDisplayPanel(User user,boolean start, ObjectOutputStream oos, ObjectInputStream ois) {
     	super(new BorderLayout());
     	
     	this.user = user;
+    	this.oos = oos;
+		this.ois = ois;
     	
-    	if(start == true){
-	        //Create the components.
+    	
+        //Create the components.
+		if(start) {		
 	        root = getDir();
 	        treePanel = new DirectoryPanel(root);
 	        populateTree(treePanel, root);
@@ -52,7 +59,8 @@ public class GuestDisplayPanel extends JPanel
 	        JPanel panel = new JPanel(new GridLayout(0,3));
 	        panel.add(importButton);;
 	        add(panel, BorderLayout.SOUTH);
-    	}
+		}
+    	
     }
     
     public File getDir() {
@@ -97,7 +105,10 @@ public class GuestDisplayPanel extends JPanel
         String command = e.getActionCommand();
         
         if (IMPORT_COMMAND.equals(command)) {
-            
+        	User project_req = new User(user.getUsername(), user.getProject(),"file_request");
+            NetworkFunctions.importProject(project_req,root.getAbsolutePath() , oos, ois);
+        	treePanel.clear();
+        	populateTree(treePanel, root);
         }
     }
 
@@ -113,7 +124,7 @@ public class GuestDisplayPanel extends JPanel
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         //Create and set up the content pane.
-        FileDisplayPanel newContentPane = new FileDisplayPanel(this.user, true);
+        GuestDisplayPanel newContentPane = new GuestDisplayPanel(this.user, true, oos, ois);
         newContentPane.setOpaque(true); //content panes must be opaque
         frame.setContentPane(newContentPane);
         System.err.println("username");

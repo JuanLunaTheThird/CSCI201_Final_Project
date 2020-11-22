@@ -15,7 +15,6 @@ public class Client {
 		InputStream is;
 		ObjectInputStream ObjInput;
 		Scanner scan;
-		FileBytes file;
 		String fname;
 	
 		try {
@@ -39,9 +38,6 @@ public class Client {
 			
 			while(true) {
 				byte[] bytes = null;
-				String byteString = null;
-				
-				
 				FileBytes serverFile = (FileBytes) ObjInput.readObject();
 				System.out.println("Server sent: " + serverFile.getRequestType());
 				System.out.println("Client time to talk");
