@@ -271,7 +271,7 @@ class sqlQueries {
 		return arr[arr.length - 1];
 	}
 
-	public static STring directoryToOwner(String directory)
+	public static String directoryToOwner(String directory)
 	{
 		String [] arr = directory.split("\\", 10);
 		return arr[arr.length - 2];
