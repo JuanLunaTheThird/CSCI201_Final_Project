@@ -36,7 +36,7 @@ public class NetworkFunctions {
 		return success;
 	}
 	
-	public static void importProject(User user, String projectdir, ObjectOutputStream clientOutput, ObjectInputStream clientInput) {
+	public static String importProject(User user, String projectdir, ObjectOutputStream clientOutput, ObjectInputStream clientInput) {
 		sendUserToServer(user, clientOutput);
 		System.err.println("Receiving file for project " + user.getProject() );
 		FileTransfer receive_file = new FileTransfer(clientOutput, clientInput);
@@ -45,6 +45,7 @@ public class NetworkFunctions {
     	unzip.unzipDir();
     	File toDelete = new File(srcdir);
     	toDelete.delete();
+    	return receive_file.getJson();
 	}
 	
 	

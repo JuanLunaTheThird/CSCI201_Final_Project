@@ -15,6 +15,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import json.GsonFunctions;
+import json.ProjectNotes;
+import json.Projects;
 import networking.NetworkFunctions;
 import serialized.User;
 
@@ -30,7 +33,7 @@ public class GuestDisplayPanel extends JPanel
     String projectName;
     private ObjectInputStream ois;
 	private ObjectOutputStream oos;
-    
+    private ProjectNotes project;
     
     public GuestDisplayPanel(User user,boolean start, ObjectOutputStream oos, ObjectInputStream ois) {
     	super(new BorderLayout());
@@ -43,7 +46,14 @@ public class GuestDisplayPanel extends JPanel
         //Create the components.
 		if(start) {		
 	        root = getDir();
-	        treePanel = new DirectoryPanel(root);
+	        boolean has_config = new File("config.txt").exists();
+	        project = null;
+	        if(has_config) {
+	        	Projects p = GsonFunctions.parseJson();
+	        	project = p.projectExists(user.getProject(), user.getUsername());
+	        }
+	        
+	        treePanel = new DirectoryPanel(root, user.getProject(), user.getUsername(), project);
 	        populateTree(treePanel, root);
 	
 	        

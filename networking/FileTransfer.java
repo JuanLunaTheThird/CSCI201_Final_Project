@@ -14,6 +14,7 @@ public class FileTransfer {
 	private ObjectOutputStream ObjOutput;
 	private ObjectOutputStream serverOutput;
 	private ObjectInputStream ObjInput;
+	private String json;
 
 	
 	public FileTransfer(ObjectOutputStream oos, ObjectInputStream iis) {
@@ -26,12 +27,12 @@ public class FileTransfer {
 	}
 	
 	
-	public void sendFileToClient(String fname) {
+	public void sendFileToClient(String fname, String project_json) {
 		Path path = Paths.get(fname);
 		try {
 			byte[] bytes = Files.readAllBytes(path);
 			
-			FileBytes toClient = new FileBytes(fname, bytes);
+			FileBytes toClient = new FileBytes(fname, bytes, project_json);
 			Packet packet = new Packet(toClient);
 			serverOutput.writeObject(packet);
 		} catch (IOException e) {
@@ -40,21 +41,29 @@ public class FileTransfer {
 		}
 	}
 	
-	
+	public String getJson() {
+		return this.json;
+	}
 	
 	public String receiveFile(String projectdir) {
 		fos = null;
 		String targetdir = null;
+		
 		try {
 			Packet packet = (Packet) ObjInput.readObject();
 			FileBytes file = packet.getFile();
 			byte[] bytes = file.getFile();
 			targetdir = projectdir + File.separator + ".zip";
+			json = file.getJsonString();
 			int lastpost = projectdir.lastIndexOf(File.separator);
 			
 			if(lastpost == -1) {
 				System.err.println("error processing string of project dir");
 			}
+			
+			
+			
+			
 			
 			fos = new FileOutputStream(targetdir);
 			fos.write(bytes);
@@ -68,14 +77,15 @@ public class FileTransfer {
 		return targetdir;
 	}
 	
-	public void sendFileToServer(String fname, String project, String owner) {
+	public void sendFileToServer(String fname, String project, String owner, String configFile) {
 		Path path = Paths.get(fname);
+		System.out.println(path);
 		try {
 			byte[] bytes = Files.readAllBytes(path);
 			
 			
 			
-			FileBytes toClient = new FileBytes(owner, fname, project, "import", bytes);
+			FileBytes toClient = new FileBytes(owner, fname, project, "import", configFile, bytes);
 			
 			Packet packet = new Packet(toClient);
 			ObjOutput.writeObject(packet);

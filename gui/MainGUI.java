@@ -1,6 +1,7 @@
 package gui;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,6 +13,8 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -32,19 +35,43 @@ public class MainGUI extends JPanel implements ActionListener {
 		super(new BorderLayout());
 		
 		
+		
+		
+		Image img = null;
+		try {
+			img = ImageIO.read(getClass().getResource("/resources/login.png"));
+		} catch (IOException e) {
+			
+			e.printStackTrace();
+		}
+		
+		
+		
 		JButton login = new JButton(LOGIN);
 		login.setActionCommand(LOGIN);
 		login.addActionListener(this);
+		login.setIcon(new ImageIcon(img));
+		
+		
+		Image registerimg = null;
+		try {
+			registerimg = ImageIO.read(getClass().getResource("/resources/login.png"));;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		
 		JButton register = new JButton(REGISTER);
 		register.setActionCommand(REGISTER);
 		register.addActionListener(this);
+		register.setIcon(new ImageIcon(registerimg));
+		
+		
 		
 		JButton guest = new JButton(GUEST);
 		guest.setActionCommand(GUEST);
 		guest.addActionListener(this);
-		
+		guest.setIcon(new ImageIcon(registerimg));
 		
 		panel = new JPanel(new GridLayout(1,0));
 		panel.add(login);

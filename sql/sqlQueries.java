@@ -3,10 +3,13 @@ package sql;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+
+import serialized.User;
 
 public class sqlQueries {
 
@@ -137,7 +140,117 @@ public class sqlQueries {
 		}
 		return true;
 	}
+	
+	//returns all versions for a project
+	
+	public static String[] returnProjectVersions(String project, String username) {
+		
+		String path = getProjectPath(project, username);
+		ArrayList<String> arrlist = new ArrayList<String>();
+		Connection conn = getConnection();
+		String queryLargestVersion = "SELECT version from project_versions where project_directory = ?;";
+		
+		
+		
+		try {
+			PreparedStatement ptst = conn.prepareStatement(queryLargestVersion);
+			ptst.setString(1, path);
+			ResultSet r1 = ptst.executeQuery();
+			while(r1.next()) {
+				arrlist.add(r1.getString(1));
+			}
+		}
+		catch(SQLException e)
+		{
+			e.printStackTrace();
+		}
+		
+		String[] version = new String[arrlist.size()];
+		
+		for(int i =0; i < arrlist.size(); ++i) {
+			version[i] = arrlist.get(i);
+		}
+		return version;
+	}
+	
+	// returns String[] of who pushed the version
+	public static String[] returnWhoPushedTheVersion(String project, String username, String[] version) {
+		
+		Connection conn = getConnection();
+		ArrayList<String> arrlist = new ArrayList<String>();
+		String path = getProjectPath(project, username);
+		String[] people = null;
+		for(int i = 0; i < version.length; ++i) {
+			String checkQuery = "SELECT user_who_pushed FROM project_versions WHERE version = \"" + version[i] + "\" AND project_directory = \"" + path + "\";";
+			
+			try(PreparedStatement stm = conn.prepareStatement(checkQuery))
+			{
+				stm.setString(1, path);
+				ResultSet res = stm.executeQuery(checkQuery);
+				if(res.next()) {
+					arrlist.add(res.getString(1));
+				}
 
+			}
+			catch(SQLException e)
+			{
+				e.printStackTrace();
+			}	
+		}
+		
+
+		people = new String[arrlist.size()];
+		System.err.println(username + "'s projects are: ");
+		for(int i = 0; i < arrlist.size(); i++)
+		{
+			people[i] = arrlist.get(i);
+		}
+		return people;
+		
+	}
+	
+	//increments version number for each user push and creates a unique version directory that has that version's files
+	
+	public static Integer createNewVersion(String username, String project) {
+		Connection conn = getConnection();
+		String path = getProjectPath(project, username);
+		System.out.println(path);
+		String queryLargestVersion = "SELECT MAX(version) + 1 from project_versions where project_directory = ?;";
+		int newVersion = 0;
+		
+		
+		try {
+			PreparedStatement ptst = conn.prepareStatement(queryLargestVersion);
+			ptst.setString(1, path);
+			ResultSet r1 = ptst.executeQuery();
+			
+			
+			if(r1.next()) {
+				newVersion = r1.getInt(1);
+			}else {
+				newVersion = 0;
+			}
+			Connection c = getConnection();
+			PreparedStatement prep = c.prepareStatement("INSERT into project_versions(project_directory, version, user_who_pushed, version_directory) VALUES(?, ?, ?, ?);");
+			prep.setString(1, path);
+			prep.setString(2, Integer.toString(newVersion));
+			prep.setString(3, username);
+			prep.setString(4, path + "\\version" + Integer.toString(newVersion));
+			
+			prep.executeUpdate();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		if(newVersion == 0) {
+			return 0;
+		}
+		return newVersion;
+	}
+	
+	
+	
+	
 	// if there are no projects to that username, then it returns an empty String[]
 	public static String[] userProjects(String username)
 	{
@@ -165,6 +278,8 @@ public class sqlQueries {
 		{
 			projects[i] = arrlist.get(i);
 		}
+		
+		
 		return projects;
 	}
 	
@@ -268,11 +383,14 @@ public class sqlQueries {
 	 */
 	public static boolean loginUser(String username, String password)
 	{
+		System.out.println(username + password);
 		Connection conn = getConnection();
-		String sqlQuery = "SELECT * FROM users WHERE username = \"" + username + "\";";
-		try(Statement stm = conn.createStatement())
-		{
-			ResultSet res = stm.executeQuery(sqlQuery);
+		String sqlQuery = "SELECT * FROM users WHERE username = ? AND password = ?;";
+		try{
+			PreparedStatement stm = conn.prepareStatement("SELECT * FROM users WHERE username = ? AND password = ?;");
+			stm.setString(1, username);
+			stm.setString(2, password);
+			ResultSet res = stm.executeQuery();
 			if(!res.next())
 			{
 				return false;

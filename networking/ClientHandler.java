@@ -6,11 +6,17 @@ import sql.sqlQueries;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+
+import com.google.gson.Gson;
 
 import serialized.Packet;
 import serialized.User;
 import serialized.FileBytes;
 import fileIO.*;
+import json.GsonFunctions;
+import json.ProjectNotes;
+import json.Projects;
 public class ClientHandler extends Thread {
 	
 	private ObjectInputStream ObjInput;
@@ -103,22 +109,42 @@ public class ClientHandler extends Thread {
 							String [] projects = sqlQueries.userProjects(guest);
 							String [] owners = sqlQueries.ownersOfProjectsForUser(guest);
 							
+	
 							
 							User projects_to_send = new User(guest, projects, owners);
-							projects_to_send.setSuccess(true);
+							
+							if (projects == null) {
+								projects_to_send.setSuccess(false);
+							}else {
+								projects_to_send.setSuccess(true);
+							}
 							NetworkFunctions.sendUserToClient(ObjOutput, projects_to_send);
 							break;
 						case USER_FILE_REQUEST:
+							//sending a project to user
 							String who_requested = user.getUsername();
 							String proj = user.getProject();
 							String dir_path = sqlQueries.getProjectPath(proj, who_requested);
 							String target_dir = dir_path + File.separator + proj + ".zip";
-							System.err.println("srcdir is " + dir_path);
-							System.out.println("targetdir is " + target_dir);
+							//int version = sqlQueries.createNewVersion(who_requested, proj);
+							//String version = "\\version" + Integer.toString();
+							
+							
 							FileZip zip = new FileZip(dir_path, target_dir);
+							String config = dir_path.substring(0, dir_path.indexOf(proj)) + "config.txt";
+							
+							String to_json = GsonFunctions.parseServerJson(config).toJson();
+							Projects p = new Gson().fromJson(to_json, Projects.class);
+							String project_creator = target_dir.substring(dir_path.indexOf("Prohub" + "\\") + 7, dir_path.indexOf("\\" + proj)); 
+							ProjectNotes curr_project_json = p.projectExists(proj, project_creator);
+							String j = curr_project_json.toJson();
+							
+							
+							
+		
 							zip.zipDir();
 							FileTransfer sendToClient = new FileTransfer(ObjOutput);
-							sendToClient.sendFileToClient(target_dir);
+							sendToClient.sendFileToClient(target_dir, j);
 							File delete = new File(target_dir);
 							delete.delete();
 							break;
@@ -142,7 +168,22 @@ public class ClientHandler extends Thread {
 								File toDelete = new File(srcdir);
 								FileZip unzip = new FileZip(srcdir, dir);
 								unzip.unzipDir();
+								System.out.println(toDelete.getName() + " is being deleted");
 								toDelete.delete();
+								
+								String json_string = file.getJsonString();
+								String pathname = "C:\\Users\\juanl\\Desktop\\Prohub\\" + file.getOwnerName() + "\\" + "config.txt";
+								File exists = new File(pathname);
+								if(exists.exists()) {
+									Projects p = GsonFunctions.parseServerJson(pathname);
+									p.updateProjectWithJsonString(json_string);
+									GsonFunctions.createServerConfig(p.getProjects(), pathname);
+								}else{
+									ArrayList<ProjectNotes> projects = new ArrayList<ProjectNotes>();
+									projects.add(new ProjectNotes(json_string));
+									GsonFunctions.createServerConfig(projects, pathname);
+								}
+								
 								break;		
 						}
 						break;

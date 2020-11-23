@@ -49,6 +49,7 @@ public class User implements Serializable {
 	}
 	
 	
+	
 	public User(String user, String[] projects, String[] owners){
 		this.username = user;
 		this.userProjects = projects;

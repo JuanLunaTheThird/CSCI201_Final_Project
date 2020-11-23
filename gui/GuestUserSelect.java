@@ -32,8 +32,6 @@ public class GuestUserSelect extends JPanel implements ActionListener {
 	
 	public GuestUserSelect(ObjectOutputStream oos, ObjectInputStream ois) {
 			super(new BorderLayout());
-		
-		
 			userField = new JLabel();
 			userField.setText("Username: ");
 			username = new JTextField();
@@ -89,7 +87,7 @@ public class GuestUserSelect extends JPanel implements ActionListener {
 				displayProjects.loadProject();
 			}
 			else {
-				message.setText("Invalid Credentials");
+				message.setText("That user doesn't have any projects!");
 			}
 		}else {
 			message.setText("Please enter credentials");

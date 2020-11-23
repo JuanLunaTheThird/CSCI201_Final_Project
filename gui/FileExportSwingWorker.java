@@ -14,14 +14,15 @@ public class FileExportSwingWorker extends SwingWorker<Object, Object> {
 	private ObjectOutputStream oos;
 	private String project;
 	private String project_owner;
-	
-	public FileExportSwingWorker(String srcdir, String targetdir, String project, String project_owner, ObjectInputStream ois, ObjectOutputStream oos) {
+	private String jsonString;
+	public FileExportSwingWorker(String srcdir, String targetdir, String project, String project_owner, String config_file, ObjectInputStream ois, ObjectOutputStream oos) {
 		zip = new FileZip(srcdir, targetdir);
 		this.targetdir = targetdir;
 		this.oos = oos;
 		this.ois = ois;
 		this.project = project;
 		this.project_owner = project_owner;
+		this.jsonString = config_file;
 	}
 	
 	
@@ -29,7 +30,7 @@ public class FileExportSwingWorker extends SwingWorker<Object, Object> {
 	protected String doInBackground() throws Exception {
 		zip.zipDir();
 		FileTransfer toServer = new FileTransfer(oos, ois);
-		toServer.sendFileToServer(targetdir, project, project_owner);
+		toServer.sendFileToServer(targetdir, project, project_owner, jsonString);
 		File toDelete = new File(targetdir);
 	
 		if(toDelete.delete()) {

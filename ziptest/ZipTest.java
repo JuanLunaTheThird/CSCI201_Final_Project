@@ -8,10 +8,6 @@ public class ZipTest {
 	
     public static void main(String[] args) {
     
-    	
-    
-    	
-    	
     	String srcdir = "C:\\Users\\juanl\\Desktop\\to zip";
     	String targetdir = "C:\\Users\\juanl\\Desktop\\write to\\pog.zip";
     

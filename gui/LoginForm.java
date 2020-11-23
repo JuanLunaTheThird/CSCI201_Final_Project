@@ -1,12 +1,16 @@
 package gui;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -31,9 +35,19 @@ public class LoginForm extends JPanel implements ActionListener {
 	   private final String login_or_register;
 	   private ObjectInputStream ois;
 	   private ObjectOutputStream oos;
-	
+	   private ImageIcon loginImage;
+	  
 	public LoginForm(String login_or_register, ObjectOutputStream oos, ObjectInputStream ois) {
 			super(new BorderLayout());
+			
+			Image img = null;
+			try {
+				img = ImageIO.read(getClass().getResource("/resources/login.png"));
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
+			
 			
 			this.login_or_register = login_or_register;
 			this.oos = oos;
@@ -48,7 +62,7 @@ public class LoginForm extends JPanel implements ActionListener {
 			password = new JPasswordField();
 			
 			submit = new JButton("Submit");
-			
+			submit.setIcon(new ImageIcon(img));
 			message = new JLabel();
 			
 			panel = new JPanel(new GridLayout(3,1));

@@ -13,10 +13,12 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import fileIO.LocalFileIO;
+import json.ProjectNotes;
+
 
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
-
+import treenode.TreeFileNode;
 public class DirectoryPanel extends JPanel {
     /**
 	 * 
@@ -28,7 +30,7 @@ public class DirectoryPanel extends JPanel {
     private Toolkit toolkit = Toolkit.getDefaultToolkit();
     String pathName;
     
-    public DirectoryPanel(File root) {
+    public DirectoryPanel(File root, String project, String owner, ProjectNotes projectNote) {
         super(new GridLayout(1,0));
         
         try {
@@ -36,8 +38,18 @@ public class DirectoryPanel extends JPanel {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-       
-        rootNode = new DefaultMutableTreeNode(root.getName());
+        
+       if(projectNote != null) {
+    	   TreeFileNode newNode = projectNote.getFileAndComment(root);
+    	   if(newNode != null) {
+    		   rootNode = new DefaultMutableTreeNode(newNode);
+    	   }else {
+    		   rootNode = new DefaultMutableTreeNode(new TreeFileNode(root, ""));
+    	   }  
+       }else {
+    	   rootNode = new DefaultMutableTreeNode(new TreeFileNode(root, ""));
+       }
+        
         treeModel = new DefaultTreeModel(rootNode);
         treeModel.addTreeModelListener(new MyTreeModelListener());
         tree = new JTree(treeModel);
@@ -117,6 +129,52 @@ public class DirectoryPanel extends JPanel {
         return childNode;
     }
     
+    public String getCurrentNodeComment() {
+    	TreePath currentSelection = tree.getSelectionPath();
+        if (currentSelection != null) {
+            DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode)
+                         currentSelection.getLastPathComponent();
+           TreeFileNode obj = (TreeFileNode) currentNode.getUserObject();
+           return obj.getComment();
+        } 
+        
+        // Either there was no selection, or the root was selected.
+        toolkit.beep();
+        return "";
+    }
+    
+    public File getCurrentNode() throws IOException {
+    	TreePath currentSelection = tree.getSelectionPath();
+        if (currentSelection != null) {
+            DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode)
+                         currentSelection.getLastPathComponent();
+           TreeFileNode obj = (TreeFileNode) currentNode.getUserObject();
+           return obj.getFile();
+        } 
+        
+        // Either there was no selection, or the root was selected.
+        toolkit.beep();
+        return null;
+    }
+    
+    
+    
+    
+    public TreeFileNode addCommentToNode(String comment) {
+    	TreePath currentSelection = tree.getSelectionPath();
+        if (currentSelection != null) {
+            DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode)
+                         currentSelection.getLastPathComponent();
+           ((TreeFileNode) currentNode.getUserObject()).setComment(comment);
+           return (TreeFileNode) currentNode.getUserObject();
+        } 
+        
+        // Either there was no selection, or the root was selected.
+        toolkit.beep();
+        return null;
+    }
+    
+    
     public DefaultMutableTreeNode addNewFile(Object file) {
     	DefaultMutableTreeNode parentNode = null;
         TreePath parentPath = tree.getSelectionPath();
@@ -140,20 +198,16 @@ public class DirectoryPanel extends JPanel {
         
         String fromPath = null;
 		try {
-			fromPath = ((File) file).getCanonicalPath();
+			fromPath = ((TreeFileNode) file).getCanonicalPath();
 		} catch (IOException e) {
-			
 			e.printStackTrace();
 		}
         
         System.err.println(path);
         
         byte[] fileData = LocalFileIO.sendFile(fromPath);
-        LocalFileIO.receiveFile( fileData, path, ((File) file).getName() );
-        
-       
-        
-        return addObject(parentNode, ((File) file).getName(), true);
+        LocalFileIO.receiveFile(fileData, path, ((TreeFileNode) file).toString() );
+        return addObject(parentNode, file, true);
     }
     
 
