@@ -1,0 +1,306 @@
+﻿CSCI 201 Final Project Proposal
+Team Members: Juan Moon, Jonah Yamato, Amanda Ding, Cindy Xie, Natasha Singh, Quinn McCarthy
+Mentor: Jack Xu
+
+
+Idea
+Online Project Tracker (GitHub for all Projects)
+* Requirements
+   * The program has user functionality and a central server to authenticate users
+      * Our program will have authenticated and unauthenticated users
+   * Users can interact with the application as a guest but experience limited functionality and must be able to register
+      * Users can register to be a part of a team and have editing rights but unauthenticated users have a view-only mode
+   * The program must have multi-threaded and network functionality
+      * Users can interact with each other and there will be a live chat that will have multiple threads running
+   * The back-end server logic must be in Java
+      * We only know Java and a little bit of C++
+* Details
+* Potential Names:
+   * GitPro 
+   * ProHub
+   * Coact or Co-Act or CoAct
+   * On-Task
+* Web application where users can login to a team and collaborate/organize their projects
+   * The project manager can assign tasks with due dates and upload documents, develop a timeline for the project, make comments on completed work and give privileges to other users to do the same
+   * Regular users/collaborators can upload documents and update the status of projects they’ve been assigned as well as any other privileges given to them by the project manager
+   * Unauthenticated users can view tasks, but cannot comment or upload documents
+   * Each task created has a chat/comment box where users can interact with each other to ask questions or get feedback from other people on the project
+* Each user has multiple teams/projects they can work on
+* Users can view a timeline of the project to see how much work has been completed so far
+* Users will receive notifications when a task they are working on has a new comment or if there is a change in the status of a task
+
+
+________________
+
+
+CSCI 201 Final Project Technical Specification
+Team Members: Juan Moon, Jonah Yamato, Amanda Ding, Cindy Xie, Natasha Singh, Quinn McCarthy
+Mentor: Jack Xu
+
+
+Server
+* Store user info in SQL
+* Store team members, tasks, timeline, project description, documents for each user → SQL
+* Store comments → SQL
+* Multithreading/networking for comments and adding stuff
+* Multithreading for each user that is online
+* Locking to make sure only one user can add comments and content at one time but make it look simultaneously
+
+
+Structure
+* Classes:
+   * Users (threads)
+   * Projects
+   * Tasks
+   * Main
+   * Comment 
+* Data structures:
+   * Tasks (priority queue)
+   * Users in Project (set)
+
+
+Tasks 
+* SQL queries for user registration and authentication (user login)
+* SQL database for storing the components of a project
+* Creating threads for users and allowing them to modify the project database
+
+
+Timeline for this week
+* Finish technical document Friday (10/23)
+* Finish SQL Database (10/26)
+* Get familiar with SQL (10/27)
+* Meet to go over server details (10/27)
+* Some time this week: 
+   * Watch Jack’s videos
+   * Java Servlets for hosting application
+
+
+Questions for Jack:
+* Hosting application
+* What type of database to use
+* How important is the frontend
+* Clarify multithreading functionality how to make each user a thread
+
+
+Frontend
+* Project page
+* Login page → SQL query for authentication
+* Registration page → SQL query for creating user
+* Notifications
+* Find basic frontend to go with Java Servlets
+________________
+CSCI 201 Final Project Full Design Document
+Team Members: Juan Moon, Jonah Yamato, Amanda Ding, Cindy Xie, Natasha Singh, Quinn McCarthy
+Mentor: Jack Xu
+
+
+SQL Database Schema:  
+
+
+Requirements:
+No hardware required
+JDBC jar file required to interact with SQL database
+
+
+GUI:
+The front-end for this application will be a console based interface that prints out menu options for the user to interact with projects, tasks, and files.
+
+
+Class diagrams:
+console
+	
+
+	+main()
+-getConnection()
+	
+
+userInterface
+	
+
+	+run(String user)
+-printProjectMenu()
+-printMenu()
+-selectProject()
+-printProjects()
+-addProject()
+-printProject()
+-addFile()
+-printDeadlines()
+-printFiles()
+-printFile()
+-addDeadline()
+-addComment()
+-addTask()
+-addUser()
+	
+
+handleUser
+	
+
+	+handleUser(Connection conn)
+-registerUser(Connection conn)
+-loginUser(Connection conn)
+	
+
+handleProject
+	
+
+	+handleProject(Connection conn)
+-addProject()
+-getProject()
+-removeProject()
+-addUsers()
+-getUsers()
+-removeUser()
+-addTasks()
+-getTasks()
+-removeUser()
+-addFiles()
+-getFiles()
+-removeFile()
+	
+
+handleTask
+	
+
+	+handleTask(Connection conn)
+-getTask()
+-removeTask()
+-getTaskUsers()
+-removeTaskUser()
+-setTaskUser()
+-getTaskProject()
+-setTaskProject()
+	
+
+handleFile
+	
+
+	+handleFile(Connection conn)
+-getFiles(Int projectID)
+-removeFile(Int projectID)
+-setFile(Int projectID)
+	
+
+Message implements Serializable
+	-comment : String
+-FileData : byte[]
+-fname : String
+	+getMsg() : String
++getFile() : byte[]
++getFileName() : String
+	
+
+
+
+Server implements Thread
+	-socket : ServerSocket
+-ObjInput : ObjectInputStream
+-ObjOutput : ObjectOutputStream
+-is : InputStream 
+-filetransfer : FileTransfer
+	+connectToUser(int) : void
++connect(int) : void
+-connectToDatabase() : void
+	                 
+
+
+Client implements Thread
+	-socket : socket
+-ObjInput : ObjectInputStream
+-ObjOutput : ObjectOutputStream
+-is : InputStream 
+-filetransfer : FileTransfer
+	+connectToServer(int) : void
+	                 
+FileTransfer
+	-socket : socket
+-fos : FileOutputStream
+	+receiveFile(String) : void
++sendFile(String) : byte[]
+	________________
+
+
+CSCI 201 Final Project Testing Plan and Code
+Team Members: Juan Moon, Jonah Yamato, Amanda Ding, Cindy Xie, Natasha Singh, Quinn McCarthy
+Mentor: Jack Xu
+
+
+Testing Plan:
+   1. Network Testing
+   1. Client
+   1. Connecting to server (receive project names if successful)
+   2. Receiving project from server
+   2. Server
+   1. Accept client connection (obtain username and password if successful)
+   2. Obtain login credentials/find user
+   3. Authentication
+   1. Authenticate client’s credentials (obtain project information if successful)
+   4. SQL
+   1. Connect to SQL database
+   2. Obtain correct information from database
+   2. File testing
+   1. Zip files (being able to send all file types and sizes)
+   2. Successfully send project information to client
+   3. Store exported projects from client to server
+   3. Login Testing
+   1. Authenticate correct login credentials
+   1. Fail authentication for incorrect user (says invalid credentials)
+   2. Fail authentication for incorrect password (says invalid credentials)
+   3. Return project information for correct username and password
+   2. Enter Guest User functionality (no login)
+   1. Search for existing user in Guest User (says real user if successful)
+   2. Fail search for non-existing user in Guest User
+   4. Project testing
+   1. Import project
+   1. View all of a user’s projects
+   2. View files in the project
+   3. Add files to the project
+   4. View comments on a file
+   5. Add comments to a file
+   2. Export project only for authenticated users
+   1. View all changes made on the project after exporting
+
+
+Code is available at: https://github.com/Qmccarth/CSCI201_Final_Project
+Recommended to check this out!
+________________
+CSCI 201 Final Project Deployment Document
+Team Members: Juan Moon, Jonah Yamato, Amanda Ding, Cindy Xie, Natasha Singh, Quinn McCarthy
+Mentor: Jack Xu
+
+
+Online Project Tracker
+   * Details
+   * Name: ProHub
+   * Web application where users can login to a team and collaborate/organize their projects
+   * The project manager can upload documents, make comments on files and add users to a project
+   * Regular users/collaborators can view the projects they’re working on, read other people’s comments, and add/delete files
+   * Unauthenticated users can view the projects a regular user is involved in and download that project’s files, but cannot edit the project or make comments
+   * Each file has a comment functionality that allows users on the project to make notes of certain files
+   * Each user has multiple teams/projects they can work on
+   * Users can download the resources for their project onto their own computer
+
+
+SQL Schema:
+Used for storing user information, project information, and the path to access files on the server.
+  
+  
+
+
+
+GUI:
+Used Java SWING to be able to thread multiple GUI elements and build windows
+Button icons were obtained from https://material.io/resources/icons/?style=baseline
+
+
+Deployment:
+
+
+Requirements: Java 15.0.1 or higher is necessary for library compatibility. The project will be included as both zipped source code as well as an executable jar that can be double clicked to start the client side portion.
+
+
+   * If running from the source code without any jars, you will only need Gson 2.6.2, you will not need JDBC if you’re only running the client side implementation of the project as the client never requests from the SQL database, only the server does.
+   * When running the client side, the application will not respond as the client must first authenticate to my (Juan’s) computer/server. Port 8080 and 3306 are forwarded on the host server computer which are for the server connection and the SQL database connection, respectively.
+   * If needed, the host server can be changed by editing the String “juanServer” in the source code as well as the ip4 address for the SQL database 
+   * There are no other constraints and the executable can be deployed as is, as long as the host server is running
